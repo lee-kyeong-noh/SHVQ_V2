@@ -107,7 +107,8 @@ window.SHV = window.SHV || {};
                 if (!_isDragging) return;
                 _dragX = e.clientX - _dragStartX;
                 _dragY = e.clientY - _dragStartY;
-                _box.style.transform = 'translate(' + _dragX + 'px, ' + _dragY + 'px)';
+                /* CSS .modal-box { animation: ... both } 의 최종 keyframe transform 을 이기려면 !important 필요 */
+                _box.style.setProperty('transform', 'translate(' + _dragX + 'px, ' + _dragY + 'px)', 'important');
             });
 
             document.addEventListener('mouseup', function () {
@@ -120,7 +121,7 @@ window.SHV = window.SHV || {};
                 if (!_isDragging || e.touches.length !== 1) return;
                 _dragX = e.touches[0].clientX - _dragStartX;
                 _dragY = e.touches[0].clientY - _dragStartY;
-                _box.style.transform = 'translate(' + _dragX + 'px, ' + _dragY + 'px)';
+                _box.style.setProperty('transform', 'translate(' + _dragX + 'px, ' + _dragY + 'px)', 'important');
             }, { passive: true });
 
             document.addEventListener('touchend', function () {
@@ -160,7 +161,7 @@ window.SHV = window.SHV || {};
     /* ── 드래그 위치 초기화 ── */
     function resetDrag() {
         _dragX = 0; _dragY = 0;
-        if (_box) _box.style.transform = '';
+        if (_box) _box.style.removeProperty('transform');
     }
 
     /* ── 로딩 스피너 ── */
@@ -382,7 +383,8 @@ window.SHV = window.SHV || {};
             if (!_isDragging) return;
             _dragX = e.clientX - _dragStartX;
             _dragY = e.clientY - _dragStartY;
-            _box.style.transform = 'translate(' + _dragX + 'px,' + _dragY + 'px)';
+            /* CSS .modal-box { animation: ... both } 의 최종 transform 을 이기려면 !important 필요 */
+            _box.style.setProperty('transform', 'translate(' + _dragX + 'px,' + _dragY + 'px)', 'important');
         });
         document.addEventListener('mouseup', function(){
             _isDragging = false;
@@ -404,7 +406,7 @@ window.SHV = window.SHV || {};
         openHtml: function(html, title, size) {
             build();
             _dragX = 0; _dragY = 0;
-            _box.style.transform = '';
+            _box.style.removeProperty('transform');
             setSize(size || 'md');
             _titleEl.textContent = title || '';
             _bodyEl.innerHTML = html;
