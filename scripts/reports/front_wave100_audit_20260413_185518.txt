@@ -1,0 +1,12 @@
+[SHVQ_V2 Front Wave100 Audit]
+time=2026-04-13 18:55:18
+root=/Users/knlee_mini/Library/Mobile Documents/com~apple~CloudDocs/Desktop/개발/shv_NEW/TEST/SHVQ_V2
+
+total_front_files=177
+menu_route_count=112
+route_map_count=115
+native_dialog_count=15
+inline_onclick_count=75
+inline_style_count=438
+todo_marker_count=1
+missing_route_count=0

@@ -1,0 +1,200 @@
+/* ── 배관배선 통계 ── */
+
+/* top toolbar */
+.ws-toolbar-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--sp-3);
+}
+
+/* card */
+.ws-card {
+    margin-bottom: var(--sp-3);
+    padding: 0;
+    overflow: hidden;
+}
+.ws-card-header {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--border);
+}
+.ws-card-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-1);
+    white-space: nowrap;
+}
+.ws-card-title i {
+    color: var(--accent);
+    margin-right: 4px;
+}
+.ws-card-desc {
+    font-size: var(--text-xs);
+    color: var(--text-3);
+}
+
+/* table wrap */
+.ws-table-wrap {
+    overflow: auto;
+    padding: var(--sp-3) var(--sp-4);
+}
+
+/* table */
+.ws-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+    table-layout: fixed;
+}
+.ws-table th,
+.ws-table td {
+    border: 1px solid var(--border);
+    padding: var(--sp-2) var(--sp-3);
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* thead */
+.ws-table thead th {
+    background: var(--bg-3);
+    color: var(--text-1);
+    font-weight: 600;
+    font-size: var(--text-xs);
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+.ws-th-fixed {
+    width: 72px;
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--bg-3);
+}
+.ws-th-usage {
+    width: 88px;
+    left: 72px;
+}
+.ws-th-sub {
+    font-weight: 400;
+    font-size: 10px;
+    color: var(--text-3);
+}
+.ws-th-reg {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-2);
+    padding: var(--sp-1) var(--sp-2) !important;
+}
+.ws-th-cnt {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--accent);
+    margin-top: 2px;
+}
+
+/* tbody */
+.ws-td-div {
+    background: var(--bg-2);
+    font-weight: 700;
+    font-size: var(--text-base);
+    color: var(--accent);
+    vertical-align: middle;
+    width: 72px;
+}
+.ws-td-usage {
+    background: var(--bg-2);
+    font-weight: 500;
+    text-align: left;
+    padding-left: var(--sp-3);
+    width: 88px;
+}
+.ws-td-cnt {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-3);
+    margin-top: 1px;
+}
+
+/* value cells */
+.ws-td-val {
+    font-weight: 600;
+    font-size: var(--text-sm);
+    transition: background 0.15s;
+}
+.ws-val-pos {
+    color: var(--success);
+    background: rgba(34, 197, 94, 0.08);
+}
+.ws-val-neg {
+    color: var(--danger);
+    background: rgba(239, 68, 68, 0.08);
+}
+.ws-val-zero {
+    color: var(--text-3);
+}
+.ws-val-empty {
+    color: var(--text-4, var(--text-3));
+    opacity: 0.4;
+}
+.ws-val-cnt {
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    color: var(--text-3);
+    margin-top: 1px;
+}
+
+/* legend */
+.ws-legend {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    padding: var(--sp-3) var(--sp-4);
+    border-top: 1px solid var(--border);
+    font-size: var(--text-xs);
+    color: var(--text-3);
+}
+.ws-leg-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.ws-leg-box {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+}
+.ws-leg-pos { background: rgba(34, 197, 94, 0.3); }
+.ws-leg-neg { background: rgba(239, 68, 68, 0.3); }
+.ws-leg-zero { background: var(--bg-3); }
+.ws-leg-note {
+    margin-left: auto;
+    font-style: italic;
+}
+
+/* hover */
+.ws-td-val:not(.ws-val-empty):hover {
+    filter: brightness(1.2);
+    cursor: default;
+}
+
+/* responsive */
+@media (max-width: 768px) {
+    .ws-legend {
+        flex-wrap: wrap;
+        gap: var(--sp-2);
+    }
+    .ws-leg-note {
+        width: 100%;
+        margin-left: 0;
+        margin-top: var(--sp-1);
+    }
+}

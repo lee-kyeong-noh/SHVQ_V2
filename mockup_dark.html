@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SH Vision Portal — 세미다크 목업</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+a { text-decoration: none; }
+button { background: none; border: none; cursor: pointer; font-family: inherit; }
+
+/* ════════════════════════════════════════
+   TOKENS
+   ════════════════════════════════════════ */
+:root {
+    /* 배경 */
+    --body-bg:
+        radial-gradient(900px 600px at 10% 0%,   rgba(60,100,200,0.18), transparent 55%),
+        radial-gradient(700px 500px at 90% 10%,  rgba(80,60,180,0.14), transparent 55%),
+        radial-gradient(600px 400px at 50% 80%,  rgba(30,60,140,0.12), transparent 60%),
+        linear-gradient(160deg, #151c2e 0%, #1a2236 45%, #1c2540 100%);
+
+    /* 패널 */
+    --panel-bg:   rgba(30,40,60,0.70);
+    --panel-bg-2: rgba(25,34,52,0.80);
+
+    /* 텍스트 */
+    --text-1:   #e2e8f4;
+    --text-2:   #8fa3c8;
+    --text-3:   #506080;
+    --text-inv: #ffffff;
+
+    /* 브랜드 */
+    --accent:        #4f8ef7;
+    --accent-hover:  #3b7af5;
+    --accent-10:     rgba(79,142,247,0.10);
+    --accent-15:     rgba(79,142,247,0.15);
+    --accent-20:     rgba(79,142,247,0.20);
+    --accent-30:     rgba(79,142,247,0.30);
+
+    /* 시맨틱 */
+    --success: #34d399;
+    --warn:    #fbbf24;
+    --danger:  #f87171;
+    --info:    #38bdf8;
+
+    /* 유리 */
+    --glass-blur:        blur(20px) saturate(160%);
+    --glass-border:      1px solid rgba(255,255,255,0.08);
+    --glass-border-mid:  1px solid rgba(255,255,255,0.12);
+    --glass-border-hi:   1px solid rgba(255,255,255,0.18);
+
+    /* 그림자 */
+    --shadow-topbar: 0 4px 24px rgba(0,0,0,0.40), inset 0 1px 0 rgba(255,255,255,0.08);
+    --shadow-sidebar: 2px 0 20px rgba(0,0,0,0.30);
+    --shadow-card: 0 4px 20px rgba(0,0,0,0.30), inset 0 1px 0 rgba(255,255,255,0.06);
+
+    /* 레이아웃 */
+    --topbar-h:  58px;
+    --sidebar-w: 200px;
+
+    /* 기타 */
+    --radius-sm:   6px;
+    --radius-md:   12px;
+    --radius-lg:   18px;
+    --radius-xl:   24px;
+    --radius-full: 9999px;
+    --font: 'Noto Sans KR', -apple-system, sans-serif;
+}
+
+/* ════════════════════════════════════════
+   BODY
+   ════════════════════════════════════════ */
+body {
+    font-family: var(--font);
+    background: var(--body-bg);
+    color: var(--text-1);
+    font-size: 13px;
+}
+
+/* ════════════════════════════════════════
+   TOPBAR
+   ════════════════════════════════════════ */
+#topbar {
+    position: fixed;
+    top: 8px; left: 10px; right: 10px;
+    height: var(--topbar-h);
+    z-index: 900;
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 4px;
+
+    background: rgba(22,32,52,0.82);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border-hi);
+    box-shadow: var(--shadow-topbar);
+}
+
+/* 로고 */
+.top-logo {
+    font-size: 15px;
+    font-weight: 800;
+    white-space: nowrap;
+    margin-right: 10px;
+    letter-spacing: -0.3px;
+}
+.logo-sh {
+    background: linear-gradient(135deg, #7eb3ff 0%, #4f8ef7 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    font-weight: 800;
+}
+.logo-rest { color: var(--text-2); font-weight: 500; }
+
+/* 햄버거 */
+.top-ham {
+    font-size: 16px; color: var(--text-2);
+    padding: 6px 8px; border-radius: var(--radius-sm);
+    transition: color .15s, background .15s;
+}
+.top-ham:hover { color: var(--text-1); background: rgba(255,255,255,0.06); }
+
+/* 탭 */
+.top-nav { display: flex; align-items: center; gap: 2px; height: 100%; margin-left: 6px; }
+
+.top-btn {
+    height: 34px; padding: 0 14px;
+    font-size: 13px; font-weight: 600;
+    color: var(--text-2);
+    border-radius: var(--radius-full);
+    transition: background .15s, color .15s, box-shadow .15s;
+    white-space: nowrap;
+}
+.top-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-1); }
+.top-btn.active {
+    background: rgba(79,142,247,0.18);
+    color: var(--accent);
+    font-weight: 700;
+    box-shadow: 0 0 0 1px rgba(79,142,247,0.30),
+                inset 0 1px 0 rgba(79,142,247,0.20);
+}
+
+/* 우측 */
+.top-spacer { flex: 1; }
+.top-right { display: flex; align-items: center; gap: 4px; }
+
+.top-icon {
+    font-size: 14px; color: var(--text-2);
+    padding: 7px 8px; border-radius: var(--radius-sm);
+    transition: background .15s, color .15s;
+}
+.top-icon:hover { background: rgba(255,255,255,0.06); color: var(--text-1); }
+
+/* 알림 뱃지 */
+.notif-wrap { position: relative; }
+.notif-badge {
+    position: absolute; top: 4px; right: 4px;
+    width: 7px; height: 7px;
+    background: var(--danger);
+    border-radius: var(--radius-full);
+    border: 1.5px solid #1a2236;
+}
+
+.top-user {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 12px 4px 6px;
+    border-radius: var(--radius-full);
+    background: rgba(255,255,255,0.06);
+    border: var(--glass-border-mid);
+    margin-left: 4px;
+    transition: background .15s;
+    cursor: pointer;
+}
+.top-user:hover { background: rgba(255,255,255,0.10); }
+
+.avatar {
+    width: 26px; height: 26px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, rgba(79,142,247,0.40), rgba(56,189,248,0.40));
+    border: 1.5px solid rgba(79,142,247,0.40);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--accent);
+}
+.user-id { font-size: 12px; font-weight: 600; color: var(--text-1); }
+
+/* ════════════════════════════════════════
+   APP BODY
+   ════════════════════════════════════════ */
+#app-body {
+    display: flex;
+    height: calc(100vh - var(--topbar-h) - 22px);
+    margin-top: calc(var(--topbar-h) + 14px);
+    padding: 0 10px 10px;
+    gap: 8px;
+}
+
+/* ════════════════════════════════════════
+   SIDEBAR
+   ════════════════════════════════════════ */
+#sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    border-radius: var(--radius-lg);
+    overflow-y: auto; overflow-x: hidden;
+    padding: 8px 6px;
+
+    background: rgba(18,28,46,0.75);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: var(--glass-border-hi);
+    box-shadow: var(--shadow-sidebar);
+
+    scrollbar-width: thin;
+    scrollbar-color: rgba(79,142,247,0.15) transparent;
+}
+#sidebar::-webkit-scrollbar { width: 3px; }
+#sidebar::-webkit-scrollbar-thumb { background: rgba(79,142,247,0.18); border-radius: 99px; }
+
+.side-title {
+    padding: 14px 10px 5px;
+    font-size: 10px; font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.60;
+    position: relative;
+}
+.side-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 10px; right: 10px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(79,142,247,0.30), transparent);
+}
+
+.side-item {
+    display: block;
+    padding: 8px 10px;
+    color: var(--text-2);
+    font-size: 12.5px; font-weight: 500;
+    border-radius: var(--radius-sm);
+    margin: 1px 0;
+    transition: background .12s, color .12s;
+}
+.side-item:visited { color: var(--text-2); }
+.side-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-1);
+}
+.side-item.active {
+    background: rgba(79,142,247,0.16);
+    color: #7eb3ff;
+    font-weight: 600;
+    box-shadow: 0 0 0 1px rgba(79,142,247,0.22),
+                inset 2px 0 0 var(--accent);
+    border-radius: var(--radius-sm);
+}
+.side-item.active:visited { color: #7eb3ff; }
+
+/* ════════════════════════════════════════
+   CONTENT
+   ════════════════════════════════════════ */
+#content {
+    flex: 1; min-width: 0;
+    overflow-y: auto;
+    border-radius: var(--radius-lg);
+    background: rgba(18,28,46,0.50);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: var(--glass-border);
+    padding: 20px 24px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(79,142,247,0.15) transparent;
+}
+
+.page-title {
+    font-size: 20px; font-weight: 700;
+    color: var(--text-1);
+    margin-bottom: 20px;
+    letter-spacing: -0.3px;
+}
+
+/* 카드 그리드 */
+.card-row { display: flex; gap: 12px; margin-bottom: 12px; }
+.card-row.col3 > .card { flex: 1; }
+.card-row.col2-1 > .card:first-child { flex: 2; }
+.card-row.col2-1 > .card:last-child  { flex: 1; }
+
+.card {
+    background: rgba(22,34,56,0.80);
+    border: var(--glass-border-mid);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+}
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+}
+
+.card-label {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-3);
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+.card-value {
+    font-size: 26px; font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.5px;
+}
+.card-sub {
+    font-size: 11.5px; color: var(--text-3);
+    margin-top: 4px;
+}
+.badge-up   { color: var(--success); font-weight: 600; }
+.badge-down { color: var(--danger);  font-weight: 600; }
+
+/* 링 차트 자리 */
+.ring-wrap {
+    display: flex; align-items: center; gap: 20px;
+}
+.ring-svg { flex-shrink: 0; }
+.ring-info { display: flex; flex-direction: column; gap: 6px; }
+.ring-pct  { font-size: 22px; font-weight: 800; color: var(--text-1); }
+.ring-desc { font-size: 11px; color: var(--text-3); }
+
+/* 스파크라인 */
+.spark {
+    display: flex; align-items: flex-end;
+    gap: 4px; height: 36px; margin-top: 10px;
+}
+.spark-bar {
+    flex: 1; border-radius: 3px 3px 0 0;
+    background: rgba(79,142,247,0.30);
+    transition: background .15s;
+}
+.spark-bar.hi { background: rgba(79,142,247,0.70); }
+
+/* 태스크 리스트 */
+.task-list { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.task-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+.task-check {
+    width: 16px; height: 16px;
+    border-radius: 4px;
+    border: 1.5px solid rgba(79,142,247,0.40);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: var(--accent);
+}
+.task-text { flex: 1; font-size: 12.5px; color: var(--text-2); }
+.task-date { font-size: 11px; color: var(--text-3); white-space: nowrap; }
+.task-pct  { font-size: 12px; font-weight: 700; color: var(--accent); width: 36px; text-align: right; }
+
+/* 진행바 */
+.prog-bar {
+    width: 100%; height: 4px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 2px;
+}
+.prog-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), #38bdf8);
+}
+
+/* 테이블 */
+.tbl { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.tbl th {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-3);
+    text-align: left;
+    padding: 6px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    letter-spacing: 0.3px;
+}
+.tbl td {
+    padding: 9px 10px;
+    font-size: 12.5px; color: var(--text-2);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: rgba(255,255,255,0.02); color: var(--text-1); }
+
+/* 태그 */
+.tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: 10.5px; font-weight: 600;
+    white-space: nowrap;
+}
+.tag-blue  { background: rgba(79,142,247,0.18); color: #7eb3ff; border: 1px solid rgba(79,142,247,0.25); }
+.tag-green { background: rgba(52,211,153,0.15); color: #34d399; border: 1px solid rgba(52,211,153,0.22); }
+.tag-amber { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.22); }
+.tag-red   { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.22); }
+
+/* 섹션 헤더 */
+.sec-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+}
+.sec-title { font-size: 13px; font-weight: 700; color: var(--text-1); }
+.sec-btn {
+    font-size: 11px; color: var(--accent);
+    padding: 4px 10px; border-radius: var(--radius-full);
+    background: rgba(79,142,247,0.10);
+    border: 1px solid rgba(79,142,247,0.20);
+    cursor: pointer;
+    transition: background .15s;
+}
+.sec-btn:hover { background: rgba(79,142,247,0.18); }
+
+/* SVG 미니 라인차트 */
+.mini-line { margin-top: 8px; opacity: 0.80; }
+</style>
+</head>
+<body>
+
+<!-- ══ TOPBAR ══ -->
+<header id="topbar">
+    <button class="top-ham"><i class="fa fa-bars"></i></button>
+
+    <a href="#" class="top-logo">
+        <span class="logo-sh">SH</span><span class="logo-rest"> Vision Portal</span>
+    </a>
+
+    <nav class="top-nav">
+        <button class="top-btn">FMS</button>
+        <button class="top-btn active">PMS</button>
+        <button class="top-btn">BMS</button>
+        <button class="top-btn">CTM</button>
+        <button class="top-btn">GRP</button>
+        <button class="top-btn">MAT</button>
+        <button class="top-btn">CAD</button>
+        <button class="top-btn">시설</button>
+        <button class="top-btn">도구</button>
+        <button class="top-btn">관리</button>
+    </nav>
+
+    <div class="top-spacer"></div>
+
+    <div class="top-right">
+        <div class="notif-wrap">
+            <button class="top-icon"><i class="fa fa-bell-o"></i></button>
+            <div class="notif-badge"></div>
+        </div>
+        <button class="top-icon"><i class="fa fa-expand"></i></button>
+        <div class="top-user">
+            <div class="avatar"><i class="fa fa-user"></i></div>
+            <span class="user-id">15051801</span>
+        </div>
+    </div>
+</header>
+
+<!-- ══ APP BODY ══ -->
+<div id="app-body">
+
+    <!-- ── SIDEBAR ── -->
+    <aside id="sidebar">
+        <div class="side-title">견적관리</div>
+        <a class="side-item" href="#">예산현황</a>
+        <a class="side-item active" href="#">견적현황</a>
+        <a class="side-item" href="#">수주현황</a>
+        <a class="side-item" href="#">실패현황</a>
+        <a class="side-item" href="#">산출내역서</a>
+
+        <div class="side-title">고정일정</div>
+        <a class="side-item" href="#">일정</a>
+
+        <div class="side-title">회의게시판</div>
+        <a class="side-item" href="#">전체</a>
+        <a class="side-item" href="#">협력업체</a>
+        <a class="side-item" href="#">내팀</a>
+    </aside>
+
+    <!-- ── CONTENT ── -->
+    <main id="content">
+        <div class="page-title">대시보드</div>
+
+        <!-- 상단 3카드 -->
+        <div class="card-row col3">
+            <div class="card">
+                <div class="card-label">예산 진행률</div>
+                <div class="ring-wrap">
+                    <svg class="ring-svg" width="64" height="64" viewBox="0 0 64 64">
+                        <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(79,142,247,0.12)" stroke-width="7"/>
+                        <circle cx="32" cy="32" r="26" fill="none" stroke="url(#rg)" stroke-width="7"
+                            stroke-dasharray="163 41" stroke-dashoffset="0"
+                            stroke-linecap="round" transform="rotate(-90 32 32)"/>
+                        <defs>
+                            <linearGradient id="rg" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stop-color="#4f8ef7"/>
+                                <stop offset="100%" stop-color="#38bdf8"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="ring-info">
+                        <div class="ring-pct">72%</div>
+                        <div class="ring-desc">시공무 72,450,000</div>
+                        <div class="ring-desc">공지 100,500,000</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-label">포포폐드 수</div>
+                <div class="card-value">35</div>
+                <div class="card-sub"><span class="badge-up">+2.1%</span> &nbsp;전월 대비</div>
+                <div class="spark">
+                    <div class="spark-bar" style="height:40%"></div>
+                    <div class="spark-bar" style="height:55%"></div>
+                    <div class="spark-bar" style="height:45%"></div>
+                    <div class="spark-bar" style="height:70%"></div>
+                    <div class="spark-bar" style="height:60%"></div>
+                    <div class="spark-bar" style="height:80%"></div>
+                    <div class="spark-bar hi" style="height:100%"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-label">보고서 제출</div>
+                <div class="card-value">5</div>
+                <div class="card-sub"><span class="badge-down">−2</span> &nbsp;금월 이월 미처리</div>
+                <svg class="mini-line" width="100%" height="36" viewBox="0 0 200 36" preserveAspectRatio="none">
+                    <polyline points="0,28 40,22 80,26 120,14 160,18 200,8"
+                        fill="none" stroke="rgba(248,113,113,0.60)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="200" cy="8" r="3" fill="#f87171"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 중단 2열 -->
+        <div class="card-row col2-1">
+            <!-- 주요 업무 -->
+            <div class="card">
+                <div class="sec-head">
+                    <span class="sec-title">주요 업무</span>
+                    <button class="sec-btn">+ 새로운 업무</button>
+                </div>
+                <div class="task-list">
+                    <div class="task-item">
+                        <div class="task-check"><i class="fa fa-check"></i></div>
+                        <div style="flex:1">
+                            <div class="task-text">Phase 9 시스템 임시 보고서 정리</div>
+                            <div class="prog-bar"><div class="prog-fill" style="width:85%"></div></div>
+                        </div>
+                        <div class="task-date">04/23</div>
+                        <div class="task-pct">85%</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-check"></div>
+                        <div style="flex:1">
+                            <div class="task-text">미니보드 UI 개선 논의</div>
+                            <div class="prog-bar"><div class="prog-fill" style="width:60%"></div></div>
+                        </div>
+                        <div class="task-date">04/22</div>
+                        <div class="task-pct">60%</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-check"></div>
+                        <div style="flex:1">
+                            <div class="task-text">MAT 코포켓 2간 임뢰 준비</div>
+                            <div class="prog-bar"><div class="prog-fill" style="width:30%"></div></div>
+                        </div>
+                        <div class="task-date">04/21</div>
+                        <div class="task-pct">30%</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-check"></div>
+                        <div style="flex:1">
+                            <div class="task-text">FMS 시스템 임증 완료</div>
+                            <div class="prog-bar"><div class="prog-fill" style="width:25%"></div></div>
+                        </div>
+                        <div class="task-date">04/20</div>
+                        <div class="task-pct">25%</div>
+                    </div>
+                    <div class="task-item">
+                        <div class="task-check"><i class="fa fa-check"></i></div>
+                        <div style="flex:1">
+                            <div class="task-text">CAD 업데이트 요청</div>
+                            <div class="prog-bar"><div class="prog-fill" style="width:90%"></div></div>
+                        </div>
+                        <div class="task-date">04/18</div>
+                        <div class="task-pct">90%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 긴급사항 -->
+            <div class="card">
+                <div class="sec-head"><span class="sec-title">긴급사항</span></div>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                    <div style="padding:10px 12px;background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.16);border-radius:8px;">
+                        <div style="font-size:10px;color:var(--danger);font-weight:700;margin-bottom:3px;">D-4</div>
+                        <div style="font-size:12.5px;color:var(--text-1);">시설 발열 완료 마비</div>
+                    </div>
+                    <div style="padding:10px 12px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.16);border-radius:8px;">
+                        <div style="font-size:10px;color:var(--warn);font-weight:700;margin-bottom:3px;">D-1</div>
+                        <div style="font-size:12.5px;color:var(--text-1);">잔발 완적 업데이트 이혈 요거</div>
+                    </div>
+                    <div style="padding:10px 12px;background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.14);border-radius:8px;">
+                        <div style="font-size:10px;color:var(--accent);font-weight:700;margin-bottom:3px;">D-0</div>
+                        <div style="font-size:12.5px;color:var(--text-1);">PMS 시스템 조두 정정</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단 테이블 -->
+        <div class="card-row">
+            <div class="card" style="flex:1">
+                <div class="sec-head">
+                    <span class="sec-title">진행 승인 프로젝트</span>
+                </div>
+                <table class="tbl">
+                    <thead>
+                        <tr>
+                            <th>프로젝트</th>
+                            <th>팀</th>
+                            <th>기간</th>
+                            <th>상태</th>
+                            <th>진행률</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Phase 10 기획</td>
+                            <td><span class="tag tag-blue">BRI팀</span></td>
+                            <td>2024-04-01 ~ 2024-05-30</td>
+                            <td><span class="tag tag-green">진행</span></td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div class="prog-bar" style="width:80px"><div class="prog-fill" style="width:65%"></div></div>
+                                    <span style="font-size:11px;color:var(--text-3);">65%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>EV 레인지 수완 검거</td>
+                            <td><span class="tag tag-green">EV팀</span></td>
+                            <td>2024-04-02 ~ 2024-04-22</td>
+                            <td><span class="tag tag-amber">검토</span></td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div class="prog-bar" style="width:80px"><div class="prog-fill" style="width:80%"></div></div>
+                                    <span style="font-size:11px;color:var(--text-3);">80%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>지붕을 캄텐 승일</td>
+                            <td><span class="tag tag-green">그린팀</span></td>
+                            <td>2024-04-21 ~ 2024-04-21</td>
+                            <td><span class="tag tag-red">지연</span></td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div class="prog-bar" style="width:80px"><div class="prog-fill" style="width:40%"></div></div>
+                                    <span style="font-size:11px;color:var(--text-3);">40%</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>스마트배터리관 플루</td>
+                            <td><span class="tag tag-blue">진산팀</span></td>
+                            <td>2024-04-01 ~ 2024-05-30</td>
+                            <td><span class="tag tag-green">진행</span></td>
+                            <td>
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <div class="prog-bar" style="width:80px"><div class="prog-fill" style="width:55%"></div></div>
+                                    <span style="font-size:11px;color:var(--text-3);">55%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+</div>
+</body>
+</html>

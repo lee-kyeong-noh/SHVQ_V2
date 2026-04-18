@@ -1,0 +1,481 @@
+/* SHV WebCAD - Styles
+   V2 Design Token 기반 + CAD 고유 오버라이드 */
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* ── CAD 테마 토큰 (V2 tokens.css 참조 + CAD 고유 시안 팔레트) ── */
+:root{
+  /* V2 토큰 매핑 — CAD 고유값 오버라이드 */
+  --bg:#0b1120;
+  --panel:#0d1828;
+  --panel2:#111e30;
+  --border:#1b3354;
+  --accent:#00aaff;          /* CAD 고유: 시안 (V2: #4f8ef7) */
+  --accent2:#0077cc;         /* CAD 고유: 딥시안 */
+  --accent3:#00ffcc;         /* CAD 고유: 틸 */
+  --text:#8ab4d4;
+  --textB:#d0e8ff;
+  --textD:#3a5a7a;
+  --danger:#ff4466;
+  --warn:#ffaa00;
+  --ok:#00cc88;
+  --shadow:0 4px 24px rgba(0,0,0,0.7);
+  /* V2 공통 토큰은 tokens.css에서 상속됨 */
+}
+body.light-mode{
+  --bg:#e8ecf0;
+  --panel:#f0f2f5;
+  --panel2:#e0e4e8;
+  --border:#c0c8d0;
+  --accent:#0077cc;
+  --accent2:#005599;
+  --accent3:#009966;
+  --text:#3a4a5a;
+  --textB:#1a2a3a;
+  --textD:#8090a0;
+  --danger:#dd2244;
+  --warn:#cc8800;
+  --ok:#009966;
+  --shadow:0 4px 24px rgba(0,0,0,0.15);
+}
+body.viewer-mode .toolBtn,body.viewer-mode .ribBtn,body.viewer-mode .ribBtn2{opacity:0.3;pointer-events:none}
+body.viewer-mode .addLayerBtn{opacity:0.3;pointer-events:none}
+body.viewer-mode #canvasWrap{cursor:default !important}
+body.viewer-mode .propBtn,body.viewer-mode .propInput,body.viewer-mode .propSelect,body.viewer-mode .colorPicker{opacity:0.4;pointer-events:none}
+/* 플로팅 윈도우 */
+.floatWin{position:fixed;z-index:800;background:var(--panel);border:1px solid var(--accent2);border-radius:8px;box-shadow:0 6px 30px rgba(0,0,0,0.6);min-width:200px;min-height:150px;width:350px;height:300px;display:flex;flex-direction:column;overflow:hidden;resize:both}
+.floatWinHead{padding:8px 12px;background:var(--panel2);border-bottom:1px solid var(--border);font-size:12px;color:var(--textB);font-weight:600;cursor:grab;display:flex;align-items:center;justify-content:space-between;user-select:none}
+.floatWinHead:active{cursor:grabbing}
+.floatWinBtns{display:flex;gap:4px}
+.floatWinBtns button{background:none;border:none;color:var(--textD);cursor:pointer;font-size:13px;padding:0 4px}
+.floatWinBtns button:hover{color:var(--textB)}
+.floatWinBody{flex:1;overflow-y:auto;padding:10px}
+#rightPanelResize:hover{background:var(--accent2)}
+
+body{background:var(--bg);color:var(--text);font-family:sans-serif;font-size:12px;overflow:hidden;height:100vh;display:flex;flex-direction:column;user-select:none}
+
+/* ── TOPBAR ── */
+#topbar{display:flex;align-items:center;height:48px;background:var(--panel);border-bottom:1px solid var(--border);padding:0 10px;gap:6px;flex-shrink:0;z-index:200}
+.logo{font-family:monospace;color:var(--accent);font-size:14px;letter-spacing:3px;margin-right:8px;white-space:nowrap}
+.topMenu{position:relative}
+.topMenuBtn{background:none;border:none;color:var(--text);cursor:pointer;padding:5px 10px;border-radius:4px;font-size:12px;font-family:sans-serif}
+.topMenuBtn:hover{background:var(--panel2);color:var(--textB)}
+.topDropdown{display:none;position:absolute;top:100%;left:0;background:var(--panel);border:1px solid var(--border);border-radius:6px;min-width:180px;z-index:500;box-shadow:var(--shadow)}
+.topDropdown.open{display:block}
+.ddHasSubmenu{position:relative}
+.ddSubmenu{display:none;position:absolute;left:100%;top:0;background:var(--panel);border:1px solid var(--border);border-radius:6px;min-width:200px;z-index:600;box-shadow:var(--shadow)}
+.ddHasSubmenu:hover .ddSubmenu{display:block}
+.ddItem{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;cursor:pointer;color:var(--text);white-space:nowrap;gap:20px}
+.ddItem:hover{background:var(--panel2);color:var(--textB)}
+.ddItem span.key{color:var(--textD);font-size:11px;font-family:monospace}
+.ddSep{height:1px;background:var(--border);margin:4px 0}
+#topbar .spacer{flex:1}
+.topBtn{background:none;border:1px solid var(--border);color:var(--text);cursor:pointer;padding:6px 10px;border-radius:4px;font-size:12px;font-family:sans-serif;height:30px;display:inline-flex;align-items:center;justify-content:center}
+.topBtn:hover{border-color:var(--accent);color:var(--accent)}
+.scaleSelect{background:var(--panel2);border:1px solid var(--border);color:var(--textB);padding:6px 6px;border-radius:4px;font-size:12px;cursor:pointer;height:30px}
+.unitSelect{background:var(--panel2);border:1px solid var(--border);color:var(--textB);padding:6px 6px;border-radius:4px;font-size:12px;cursor:pointer;height:30px}
+
+/* ── MAIN AREA ── */
+#main{display:flex;flex:1;overflow:hidden;position:relative}
+
+/* ── LEFT TOOLBAR ── */
+#toolbar{width:48px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:3px;flex-shrink:0;overflow-y:auto;z-index:100}
+.toolGroup{width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--border)}
+.toolGroup:last-child{border-bottom:none}
+.toolBtn{width:36px;height:36px;background:none;border:1px solid transparent;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text);font-size:16px;position:relative;transition:all 0.15s}
+.toolBtn:hover{background:var(--panel2);border-color:var(--border);color:var(--textB)}
+.toolBtn.active{background:rgba(0,170,255,0.15);border-color:var(--accent);color:var(--accent)}
+.toolBtn .tip{position:absolute;left:48px;top:50%;transform:translateY(-50%);background:#1a2840;border:1px solid var(--border);color:var(--textB);padding:4px 10px;border-radius:4px;white-space:nowrap;font-size:11px;pointer-events:none;opacity:0;transition:opacity 0.2s;z-index:1000}
+.toolBtn:hover .tip{opacity:1}
+
+/* ── CANVAS AREA ── */
+#canvasWrap{flex:1;position:relative;overflow:hidden;background:#000000;cursor:none;min-width:0;width:100%}
+#mainCanvas{position:absolute;top:0;left:0}
+#overlayCanvas{position:absolute;top:0;left:0;pointer-events:none}
+
+/* ── RIGHT PANEL ── */
+#rightPanel{width:220px;background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:200;overflow:hidden;position:fixed;right:0;top:80px;bottom:0;box-shadow:-4px 0 20px rgba(0,0,0,0.4)}
+.rTab{display:flex;border-bottom:1px solid var(--border)}
+.rTabBtn{flex:1;background:none;border:none;color:var(--textD);cursor:pointer;padding:8px 4px;font-size:11px;font-family:sans-serif;border-bottom:2px solid transparent}
+.rTabBtn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.rTabContent{display:none;flex:1;overflow-y:auto;padding:10px}
+.rTabContent.active{display:block}
+
+/* Layer Panel */
+.layerGroupHeader{padding:4px 8px;color:var(--accent);font-size:10px;font-weight:600;letter-spacing:0.5px;border-bottom:1px solid var(--border);margin-bottom:2px}
+.layerGroupName{display:flex;align-items:center;gap:4px}
+.layerItem{display:flex;align-items:center;gap:4px;padding:5px 6px;border-radius:5px;cursor:pointer;border:1px solid transparent;margin-bottom:2px;transition:border-top 0.1s}
+.layerItem:hover{background:var(--panel2)}
+.layerItem.active{background:rgba(0,170,255,0.1);border-color:var(--accent2)}
+.layerDrag{cursor:grab;color:var(--textD);font-size:10px;padding:0 2px;user-select:none}
+.layerDrag:active{cursor:grabbing}
+.layerColor{width:14px;height:14px;border-radius:3px;flex-shrink:0;cursor:pointer}
+.layerName{flex:1;color:var(--textB);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.layerName input{background:none;border:none;color:var(--textB);font-size:11px;width:100%;outline:none}
+.layerStyle{font-size:12px;color:var(--textD);cursor:pointer;padding:0 2px;font-weight:bold}
+.layerStyle:hover{color:var(--accent)}
+.layerIco{font-size:12px;color:var(--textD);cursor:pointer;padding:1px}
+.layerIco:hover{color:var(--textB)}
+.layerIco.on{color:var(--accent)}
+.addLayerBtn{width:100%;background:none;border:1px dashed var(--border);color:var(--textD);cursor:pointer;padding:6px;border-radius:5px;font-size:11px;font-family:sans-serif;margin-top:4px}
+.addLayerBtn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Properties Panel */
+.propGroup{margin-bottom:12px}
+.propLabel{color:var(--textD);font-size:11px;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.propRow{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.propRow label{color:var(--text);font-size:11px;width:60px;flex-shrink:0}
+.propInput{background:var(--panel2);border:1px solid var(--border);color:var(--textB);padding:4px 7px;border-radius:4px;font-size:11px;width:100%;font-family:sans-serif}
+.propInput:focus{outline:none;border-color:var(--accent)}
+.propSelect{background:var(--panel2);border:1px solid var(--border);color:var(--textB);padding:4px 7px;border-radius:4px;font-size:11px;width:100%;cursor:pointer}
+.colorPicker{width:36px;height:26px;padding:2px;border-radius:4px;border:1px solid var(--border);cursor:pointer;background:var(--panel2)}
+.propBtn{background:var(--panel2);border:1px solid var(--border);color:var(--text);cursor:pointer;padding:5px 10px;border-radius:4px;font-size:11px;font-family:sans-serif}
+.propBtn:hover{border-color:var(--accent);color:var(--accent)}
+.propBtnFull{width:100%}
+.lineStyleBtns{display:flex;gap:4px}
+.lsBtn{flex:1;background:var(--panel2);border:1px solid var(--border);color:var(--text);cursor:pointer;padding:5px 4px;border-radius:4px;font-size:11px;text-align:center}
+.lsBtn.active{border-color:var(--accent);color:var(--accent);background:rgba(0,170,255,0.1)}
+
+/* ── STATUS BAR ── */
+#statusbar{height:28px;background:var(--panel);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 12px;flex-shrink:0;font-family:monospace;font-size:11px;color:var(--textD);gap:4px;}
+#statusbar span{color:var(--text)}
+#statusbar b{color:var(--accent)}
+
+/* ── MODALS ── */
+.modalOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;overflow-y:auto;padding:20px 0}
+.modalOverlay.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px;min-width:320px;max-width:520px;width:90%;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal.modal-sm{min-width:280px;max-width:400px;max-height:80vh}
+.modal.modal-md{min-width:500px;max-width:700px;min-height:400px;max-height:90vh}
+.modal.modal-lg{min-width:700px;max-width:950px;min-height:500px;max-height:95vh;width:95vw}
+.modalTitle{color:var(--textB);font-size:14px;font-weight:500;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);cursor:grab;user-select:none}
+.modalTitle:active{cursor:grabbing}
+.modalRow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.modalRow label{color:var(--text);font-size:12px;width:100px;flex-shrink:0}
+.modalInput{background:var(--panel2);border:1px solid var(--border);color:var(--textB);padding:6px 10px;border-radius:5px;font-size:12px;flex:1;font-family:sans-serif}
+.modalInput:focus{outline:none;border-color:var(--accent)}
+.modalSelect{background:var(--panel2);border:1px solid var(--border);color:var(--textB);padding:6px 10px;border-radius:5px;font-size:12px;flex:1;cursor:pointer}
+.modalBtns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
+.setSideItem{padding:8px 16px;color:var(--textD);font-size:12px;cursor:pointer;border-left:3px solid transparent;transition:all 0.12s}
+.setSideItem:hover{background:rgba(255,255,255,0.03);color:var(--textB)}
+.setSideItem.active{color:var(--accent);border-left-color:var(--accent);background:rgba(0,170,255,0.08);font-weight:600}
+.setTabContent{display:none}
+.setTabContent.active{display:block}
+.btnPrimary{background:var(--accent2);border:1px solid var(--accent);color:#fff;cursor:pointer;padding:7px 18px;border-radius:5px;font-size:12px;font-family:sans-serif}
+.btnPrimary:hover{background:var(--accent)}
+.btnSecondary{background:var(--panel2);border:1px solid var(--border);color:var(--text);cursor:pointer;padding:7px 18px;border-radius:5px;font-size:12px;font-family:sans-serif}
+.btnSecondary:hover{border-color:var(--accent);color:var(--textB)}
+.btnDanger{background:rgba(255,68,102,0.15);border:1px solid var(--danger);color:var(--danger);cursor:pointer;padding:7px 18px;border-radius:5px;font-size:12px;font-family:sans-serif}
+
+/* PDF Print Area Selector */
+#printOverlay{display:none;position:absolute;inset:0;cursor:crosshair;z-index:300}
+#printRect{position:absolute;border:2px dashed var(--warn);background:rgba(255,170,0,0.05);pointer-events:none}
+#printLabel{position:fixed;background:var(--warn);color:#000;padding:3px 8px;border-radius:4px;font-size:11px;pointer-events:none;font-family:monospace}
+
+/* Shortcut help */
+#shortcutModal .scGrid{display:grid;grid-template-columns:1fr 1fr;gap:4px 16px;margin-top:8px}
+#shortcutModal .scRow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)}
+#shortcutModal .scKey{font-family:monospace;color:var(--accent);font-size:11px}
+#shortcutModal .scDesc{color:var(--text);font-size:11px}
+
+/* Notification */
+#notify{position:fixed;top:50px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--accent);color:var(--textB);padding:8px 18px;border-radius:6px;font-size:12px;z-index:2000;opacity:0;transition:opacity 0.3s;pointer-events:none}
+
+/* Grid canvas background */
+#canvasWrap::before{content:'';position:absolute;inset:0;pointer-events:none}
+
+/* Context Menu */
+#ctxMenu{display:none;position:fixed;background:var(--panel);border:1px solid var(--border);border-radius:7px;min-width:160px;z-index:900;box-shadow:var(--shadow);padding:4px 0}
+.ctxItem{padding:7px 16px;cursor:pointer;color:var(--text);font-size:12px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.ctxItem:hover{background:var(--panel2);color:var(--textB)}
+.ctxItem .ctxKey{color:var(--textD);font-size:11px;font-family:monospace}
+.ctxSep{height:1px;background:var(--border);margin:4px 0}
+
+/* Responsive — V2 브레이크포인트 (1024px/768px) */
+@media(max-width:1024px){
+  #rightPanel{width:180px}
+  .modal.modal-lg{min-width:auto;width:95vw}
+}
+@media(max-width:768px){
+  #rightPanel{display:none}
+  #toolbar{width:42px}
+  .toolBtn{width:32px;height:32px;font-size:14px}
+  #toolRibbon{height:48px}
+  .ribBtn,.ribBtn2{min-width:36px;height:30px}
+  .ribIco{font-size:13px}
+  .ribTxt{display:none}
+}
+@media(max-width:480px){
+  #toolbar{width:100%;height:48px;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--border)}
+  #main{flex-direction:column}
+  .toolGroup{flex-direction:row;border-bottom:none;border-right:1px solid var(--border);padding-bottom:0;padding-right:6px;margin-bottom:0;margin-right:6px}
+}
+
+/* ── RIBBON TABS ── */
+#ribbonTabs{
+  display:flex;align-items:center;height:26px;
+  background:var(--panel);border-bottom:1px solid var(--border);
+  padding:0 8px;gap:2px;flex-shrink:0;
+}
+.ribTabBtn{
+  background:none;border:none;border-bottom:2px solid transparent;
+  color:var(--textD);font-size:11px;padding:4px 14px;cursor:pointer;
+  transition:all 0.15s;letter-spacing:0.5px;
+}
+.ribTabBtn:hover{color:var(--textB);}
+.ribTabBtn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.ribTabContent{display:none;flex:1;align-items:center;gap:0;}
+.ribTabContent.active{display:flex;}
+
+/* ── TOOL RIBBON ── */
+#toolRibbon{
+  display:flex;align-items:center;height:56px;
+  background:var(--panel2);border-bottom:1px solid var(--border);
+  padding:0 8px;gap:0;flex-shrink:0;overflow-x:auto;
+  scrollbar-width:thin;
+}
+#toolRibbon::-webkit-scrollbar{height:3px}
+#toolRibbon::-webkit-scrollbar-thumb{background:var(--border)}
+.ribGroup{display:flex;flex-direction:column;align-items:center;padding:2px 4px;}
+.ribLabel{font-size:9px;color:var(--textD);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3px;white-space:nowrap;width:100%;text-align:center;}
+.ribRow{display:flex;flex-direction:row;gap:2px;}
+.ribBtn, .ribBtn2{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-width:42px;height:36px;background:none;border:1px solid transparent;
+  border-radius:5px;cursor:pointer;color:var(--text);gap:1px;padding:0 4px;
+  transition:all 0.12s;flex-shrink:0;
+}
+.ribBtn:hover,.ribBtn2:hover{background:rgba(255,255,255,0.05);border-color:var(--border);color:var(--textB);}
+.ribBtn.active{background:rgba(0,170,255,0.15);border-color:var(--accent);color:var(--accent);}
+.ribIco{font-size:15px;line-height:1.2;}
+.ribTxt{font-size:9px;color:inherit;white-space:nowrap;font-family:sans-serif;line-height:1;}
+.ribSep{width:1px;height:38px;background:var(--border);margin:0 6px;flex-shrink:0;align-self:center;}
+/* ── TOOL RIBBON END ── */
+
+/* State toggle buttons in statusbar */
+.stateBtn{
+  display:inline-flex;align-items:center;gap:5px;
+  background:rgba(0,170,255,0.12);border:1px solid var(--accent2);
+  color:var(--accent);cursor:pointer;padding:3px 10px;border-radius:4px;
+  font-size:11px;font-family:sans-serif;
+  transition:all 0.15s;margin-left:6px;
+}
+.stateBtn:hover{background:rgba(0,170,255,0.22);}
+.stateBtn.off{
+  background:rgba(255,255,255,0.03);border-color:var(--border);
+  color:var(--textD);
+}
+.stateBtn.off:hover{border-color:var(--accent2);color:var(--text);}
+.sbIcon{font-size:13px;line-height:1;}
+.sbState{
+  font-family:monospace;font-size:10px;
+  background:rgba(0,170,255,0.2);border-radius:3px;padding:1px 5px;
+  color:var(--accent);letter-spacing:1px;
+}
+.stateBtn.off .sbState{
+  background:rgba(255,255,255,0.05);color:var(--textD);
+}
+
+/* annotation bubble */
+.annot-bubble{position:absolute;background:rgba(255,255,150,0.9);border:1px solid #999;border-radius:4px;padding:3px 6px;font-size:11px;color:#333;pointer-events:none;max-width:160px;word-break:break-all}
+
+
+
+#ppOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9000;align-items:center;justify-content:center}
+#ppBox{background:#0d1828;border:1px solid #1b3354;border-radius:10px;width:700px;max-width:95vw;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.9)}
+.ppHead{padding:16px 20px;border-bottom:1px solid #1b3354;display:flex;align-items:center;justify-content:space-between}
+.ppHead h2{color:#d0e8ff;font-size:15px;font-weight:500;margin:0}.ppBtns{display:flex;gap:8px}
+.ppBtn{background:#0077cc;border:none;color:#fff;padding:7px 16px;border-radius:5px;cursor:pointer;font-size:12px}
+.ppBtn:hover{background:#00aaff}
+.ppBtnSec{background:#111e30;border:1px solid #1b3354;color:#8ab4d4;padding:7px 14px;border-radius:5px;cursor:pointer;font-size:12px}
+#ppList{flex:1;overflow-y:auto;padding:10px}
+.ppItem{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:5px}
+.ppItem:hover{background:#111e30;border-color:#1b3354}
+.ppThumb{width:80px;height:50px;background:#0a0f1a;border:1px solid #1b3354;border-radius:4px;flex-shrink:0;object-fit:contain}
+.ppInfo{flex:1}.ppTitle{color:#d0e8ff;font-size:13px;margin-bottom:3px}.ppDate{color:#3a5a7a;font-size:11px}
+.ppDel{background:none;border:1px solid #ff4466;color:#ff4466;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px;flex-shrink:0}
+.ppDel:hover{background:rgba(255,68,102,.15)}
+#ppEmpty{color:#3a5a7a;text-align:center;padding:50px;font-size:13px}
+#sdOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9500;align-items:center;justify-content:center}
+#sdBox{background:#0d1828;border:1px solid #1b3354;border-radius:8px;padding:22px;min-width:320px}
+#sdBox h3{color:#d0e8ff;font-size:14px;margin:0 0 14px}
+#sdTitleInp{width:100%;background:#111e30;border:1px solid #1b3354;color:#d0e8ff;padding:9px 12px;border-radius:5px;font-size:13px;box-sizing:border-box;outline:none}
+#sdTitleInp:focus{border-color:#00aaff}
+.sdBtns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.sdOk{background:#0077cc;border:none;color:#fff;padding:8px 18px;border-radius:5px;cursor:pointer;font-size:12px}
+.sdOk:hover{background:#00aaff}
+.sdCancel{background:#111e30;border:1px solid #1b3354;color:#8ab4d4;padding:8px 14px;border-radius:5px;cursor:pointer;font-size:12px}
+/* ── 명령창 ── */
+#cmdBar{
+  display:flex;align-items:center;height:28px;
+  background:#050b14;border-top:1px solid #0f2030;
+  padding:0 10px;gap:8px;flex-shrink:0;z-index:100;
+  font-family:monospace;font-size:12px;
+}
+#cmdPrompt{color:#3a7a9a;white-space:nowrap;user-select:none}
+#cmdInputWrap{position:relative;flex:1}
+#cmdInput{
+  width:100%;background:transparent;border:none;outline:none;
+  color:#00ff88;font-family:monospace;font-size:12px;caret-color:#00ff88;
+}
+#cmdInput::placeholder{color:#1a3a2a}
+#cmdDropdown{
+  display:none;position:absolute;bottom:100%;left:0;
+  background:#0a1520;border:1px solid #1b3354;border-radius:6px;
+  min-width:260px;z-index:2000;box-shadow:0 -4px 20px rgba(0,0,0,0.8);
+  overflow:hidden;margin-bottom:4px;
+}
+.cmdDdItem{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 12px;cursor:pointer;
+  border-bottom:1px solid #0a1828;
+}
+.cmdDdItem:last-child{border-bottom:none}
+.cmdDdItem:hover,.cmdDdItem.active{background:#111e30}
+.cmdDdKey{
+  font-family:monospace;color:#00aaff;font-size:12px;
+  background:#0a1828;border:1px solid #1b3354;
+  padding:1px 6px;border-radius:3px;min-width:36px;text-align:center;
+}
+.cmdDdLabel{color:#d0e8ff;font-size:12px;flex:1}
+.cmdDdDesc{color:#3a5a7a;font-size:11px}
+.cmdDdMatch{color:#00ff88}
+#cmdHistory{
+  color:#2a5a3a;font-size:11px;font-family:monospace;
+  white-space:nowrap;overflow:hidden;max-width:300px;
+  text-overflow:ellipsis;
+}
+
+/* ── CAD 유틸리티 클래스 (inline style 추출) ── */
+.cad-hint{color:var(--textD);font-size:11px}
+.cad-hint-sm{color:var(--textD);font-size:10px}
+.cad-val{color:var(--textB);font-size:11px}
+.cad-accent{color:var(--accent);font-size:11px;font-weight:600}
+.cad-accent-lg{color:var(--accent);font-size:13px;font-weight:700}
+.cad-flex{display:flex;align-items:center}
+.cad-flex-between{display:flex;align-items:center;justify-content:space-between}
+.cad-fill{flex:1}
+.cad-gap-6{gap:6px}
+.cad-gap-8{gap:8px}
+.cad-gap-10{gap:10px}
+.cad-gap-14{gap:14px}
+.cad-scroll-sm{max-height:120px;overflow-y:auto}
+.cad-scroll-md{max-height:150px;overflow-y:auto}
+.cad-scroll-lg{max-height:220px;overflow-y:auto}
+.cad-scroll-xl{max-height:280px;overflow-y:auto}
+.cad-readonly{background:transparent;border-color:transparent}
+.cad-card{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:12px}
+.cad-card-accent{background:var(--bg);border:1px solid var(--accent2);border-radius:6px;padding:12px;margin-bottom:12px}
+.cad-section-title{font-size:10px;font-weight:600;color:var(--textD);letter-spacing:0.5px;margin-bottom:6px}
+.cad-section-title-accent{font-size:10px;color:var(--accent);letter-spacing:0.5px;margin-bottom:6px}
+.cad-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px}
+.cad-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 14px}
+/* 로고 */
+.logo-shv{color:#00aaff;font-weight:800}
+.logo-smart{color:#d0e8ff;font-weight:400}
+.logo-cad{color:#00ffcc;font-weight:700}
+/* 사이트 정보 */
+#siteInfo{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--textB);white-space:nowrap}
+.siteNo-conn{color:#00ffcc}
+.siteNo-none{color:#00aaff}
+/* 버튼 변형 */
+.cad-btn-site{font-size:10px;padding:3px 10px;margin-left:6px;background:#00aaff;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700}
+.cad-btn-logout{background:#ff4466;border:none;color:#fff;padding:4px 10px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:600}
+.cad-btn-search{background:var(--accent);border:none;color:#fff;padding:6px 10px;border-radius:5px;cursor:pointer;font-size:14px}
+.cad-btn-back{background:none;border:1px solid var(--border);color:var(--textB);padding:4px 10px;border-radius:4px;cursor:pointer;font-size:11px}
+.cad-btn-new{background:var(--accent);border:none;color:#fff;padding:6px 16px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600}
+/* 포팝업 버튼 */
+.cad-popout-btn{background:none;border:none;color:var(--textD);cursor:pointer;font-size:11px}
+/* 유저 포토 */
+.cad-user-photo{width:26px;height:26px;border-radius:50%;border:1px solid var(--border);object-fit:cover}
+.cad-user-name{color:var(--textB);font-size:11px;margin:0 2px}
+/* 데모 로그인 전용 */
+.login-contact{color:#5a7a9a;font-size:11px;margin-top:10px}
+.login-field input.demo-readonly{color:#00aaff;font-weight:700}
+/* 포탈바 */
+#portalSiteBar{display:flex;align-items:center;gap:10px;padding:2px 12px;background:#0a1628;border-bottom:1px solid var(--border);font-size:11px;color:var(--textB)}
+.portal-select{font-size:10px;padding:1px 4px;background:#111e30;color:var(--textB);border:1px solid var(--border);border-radius:3px}
+/* 패널 리사이즈 */
+#rightPanelResize{width:4px;cursor:col-resize;background:transparent;z-index:201;position:fixed;right:220px;top:80px;bottom:0}
+/* 속성패널 요소 */
+.prop-range{flex:1}
+.prop-textarea{width:100%;height:50px;background:var(--panel2);border:1px solid var(--border);color:var(--textB);font-size:11px;padding:6px 8px;border-radius:4px;resize:vertical;font-family:sans-serif;outline:none}
+/* 모달 내부 */
+.modal-flex{display:flex;flex-direction:column;padding:0;overflow:hidden}
+.modal-header{padding:14px 20px;margin:0;border-bottom:1px solid var(--border)}
+.modal-step{flex:1;display:flex;flex-direction:column;padding:16px}
+.modal-step-info{background:var(--panel2);border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:12px}
+/* 명령 히스토리 패널 */
+#cmdHistPanel{height:95px;overflow-y:auto;background:#0a1020;border:1px solid #1a3050;font-family:monospace;font-size:11px;flex-shrink:0}
+#cmdHistBtn{background:none;border:1px solid #1a3050;color:#5588aa;font-size:10px;padding:2px 8px;cursor:pointer;border-radius:3px;white-space:nowrap}
+/* 사이드메뉴 하위 */
+.cs-sub-label{padding:4px 14px 2px;font-size:10px;font-weight:600;color:var(--textD);margin-top:4px}
+.cs-sub-item{padding-left:24px;font-size:10px}
+.cs-bottom-icon{margin-right:4px}
+
+/* ── 배선 테이블 ── */
+.wire-table{width:100%;border-collapse:collapse;font-size:11px}
+.wire-table th{padding:5px 8px;text-align:left;color:var(--textD);border-bottom:1px solid var(--border)}
+.wire-table th.tc{text-align:center}
+.wire-table th.tr{text-align:right}
+.wire-table td{padding:4px 8px;border-bottom:1px solid var(--border)}
+.wire-table td.tc{text-align:center}
+.wire-table td.hint{color:var(--textD)}
+.wire-table .wire-input{padding:2px 6px;font-size:11px}
+.wire-table .wire-select{padding:2px 4px;font-size:10px;width:48px}
+.wire-table .wire-qty{padding:2px 6px;font-size:11px;text-align:right;width:55px}
+.wire-del{color:var(--danger);cursor:pointer;font-size:13px}
+.wire-wrap{border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.wire-add{margin-top:6px;background:none;border:1px dashed var(--border);color:var(--textD);cursor:pointer;padding:4px 12px;border-radius:4px;font-size:10px;width:100%}
+/* 설정 모달 */
+.set-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+.set-sep{margin:10px 0 4px;color:var(--textD);font-size:10px;letter-spacing:0.5px}
+.set-side{width:140px;background:var(--panel2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:8px 0;flex-shrink:0}
+.set-body{flex:1;overflow-y:auto;padding:16px}
+/* 인쇄 모달 */
+.print-layout{display:flex;gap:16px;flex-wrap:wrap}
+.print-left{flex:0 0 200px}
+.print-right{flex:1;min-width:300px}
+.print-preview-label{font-size:11px;font-weight:600;color:#888;margin-bottom:6px}
+.print-preview-wrap{border:1px solid #444;border-radius:6px;background:#525659;display:flex;align-items:center;justify-content:center;min-height:250px;overflow:hidden}
+#printPreviewCanvas{max-width:100%;max-height:250px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.btn-print{background:#16a34a}
+/* About 모달 */
+.about-body{padding:16px 0;color:var(--textB);font-size:13px;line-height:1.8}
+.about-title{font-size:24px;font-weight:700;color:var(--accent);margin-bottom:8px}
+/* Footer */
+#footer{height:22px;background:#0a0f1a;border-top:1px solid #1a2a40;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;color:#4a6080;letter-spacing:0.5px}
+/* 모달 Footer (버튼 영역) */
+.modal-footer-bar{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px}
+/* 작업범위 섹션 */
+.scope-section{margin-top:12px;padding-top:10px;border-top:1px solid var(--border)}
+/* 파일명 readonly */
+.site-filename{color:var(--accent);font-weight:600;background:transparent;border-color:var(--border);flex:1}
+/* 인쇄영역 정보 */
+.print-area-info{font-size:10px;color:#00aaff;margin:-6px 0 8px;padding:4px 8px;background:#0a1a2a;border:1px solid #1a3a5a;border-radius:4px}
+.print-area-btn{width:100%;padding:8px;background:#00aaff;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer}
+/* 키 힌트 */
+.key-hint{color:var(--textD);font-size:9px}
+
+/* ── JS 동적 HTML용 클래스 ── */
+.cad-empty{padding:12px;color:var(--textD);text-align:center;font-size:11px}
+.cad-list-header{display:flex;align-items:center;gap:6px;padding:7px 12px;background:var(--panel2);border-bottom:2px solid var(--border);font-size:11px;color:var(--textB);font-weight:700;letter-spacing:0.3px;position:sticky;top:0;z-index:1;text-align:left}
+.cad-list-row{display:flex;align-items:center;gap:6px;padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:background 0.1s;font-size:11px;color:var(--textB);text-align:left}
+.cad-list-row:hover{background:rgba(0,170,255,0.1)}
+.cad-badge-cad{background:#6366f1;color:#fff;padding:1px 4px;border-radius:2px;font-size:8px;font-weight:700}
+.cad-badge-file{background:#3a6a8a;color:#fff;padding:1px 4px;border-radius:2px;font-size:8px;font-weight:700}
+.cad-dwg-loading{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:36px 48px;text-align:center;min-width:320px;box-shadow:0 8px 40px rgba(0,0,0,0.6)}
+
+/* ── 드래그앤드롭 힌트 ── */
+#canvasWrap.dragover{
+  outline: 2px dashed #00aaff !important;
+}
+#canvasWrap.dragover::after{
+  content: '파일을 여기에 놓으세요';
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  color:#00aaff; font-size:18px;
+  background:rgba(0,0,0,0.6);
+  padding:12px 24px; border-radius:8px;
+  pointer-events:none; z-index:500;
+}

@@ -1,0 +1,620 @@
+/* ========================================
+   SHVQ V2 — Layout  (Liquid Glass + Dark/Light)
+   ======================================== */
+
+/* ══════════════════════════════════════════
+   TOPBAR
+   ══════════════════════════════════════════ */
+#topbar {
+    position: fixed;
+    top: 10px;
+    left: 12px;
+    right: 12px;
+    z-index: var(--z-topbar);
+    display: flex;
+    align-items: center;
+    height: var(--topbar-h);
+    padding: 0 var(--sp-3);
+    gap: var(--sp-1);
+    border-radius: var(--radius-xl);
+
+    background: var(--topbar-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--topbar-border);
+    box-shadow: var(--topbar-shadow);
+
+    transition: background var(--duration-normal) var(--ease-default),
+                border-color var(--duration-normal) var(--ease-default),
+                box-shadow var(--duration-normal) var(--ease-default);
+}
+
+/* ── Logo ── */
+.top-logo {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-extrabold);
+    margin-right: var(--sp-3);
+    white-space: nowrap;
+    letter-spacing: -0.3px;
+    text-decoration: none;
+}
+
+.logo-sh {
+    background: linear-gradient(135deg, #1a2a40 0%, #3b6cf7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--weight-extrabold);
+}
+
+[data-theme="dark"] .logo-sh {
+    background: linear-gradient(135deg, #7eb3ff 0%, #4f8ef7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.logo-vision {
+    color: var(--text-2);
+    font-weight: var(--weight-medium);
+}
+
+.logo-portal {
+    background: linear-gradient(135deg, #3b6cf7 0%, #2aafd4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: var(--weight-semibold);
+}
+
+/* ── Topbar Nav ── */
+.top-nav {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: var(--sp-2);
+    height: 100%;
+}
+
+.top-menu-btn {
+    padding: 0 14px;
+    height: 36px;
+    font-size: 13px;
+    font-weight: var(--weight-semibold);
+    color: var(--text-2);
+    display: flex;
+    align-items: center;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    transition:
+        background var(--duration-fast) var(--ease-default),
+        color var(--duration-fast) var(--ease-default),
+        box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.top-menu-btn:hover {
+    background: var(--top-btn-hover-bg);
+    color: var(--text-1);
+}
+
+[data-theme="dark"] .top-menu-btn:hover {
+    color: #8fb4ff;
+}
+
+.top-menu-btn.active {
+    background: var(--top-btn-active-bg);
+    color: var(--accent);
+    font-weight: var(--weight-bold);
+    box-shadow: var(--top-btn-active-shadow);
+    border: 1px solid var(--top-btn-active-border);
+}
+
+/* ── Sidebar Toggle ── */
+.sidebar-toggle {
+    font-size: var(--text-lg);
+    color: var(--text-2);
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
+    transition:
+        background var(--duration-fast) var(--ease-default),
+        color var(--duration-fast) var(--ease-default);
+}
+
+.sidebar-toggle:hover {
+    background: var(--icon-btn-hover-bg);
+    color: var(--text-1);
+}
+
+/* ── Topbar Right ── */
+.top-spacer { flex: 1; }
+
+.top-right {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.top-icon-btn {
+    font-size: 15px;
+    color: var(--text-2);
+    padding: 7px 9px;
+    border-radius: var(--radius-sm);
+    transition:
+        background var(--duration-fast) var(--ease-default),
+        color var(--duration-fast) var(--ease-default);
+}
+
+.top-icon-btn:hover {
+    background: var(--icon-btn-hover-bg);
+    color: var(--text-1);
+}
+
+.top-user {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding: 4px var(--sp-2) 4px var(--sp-2);
+    border-radius: var(--radius-full);
+    background: var(--user-pill-bg);
+    border: 1px solid var(--user-pill-border);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.20);
+    margin-left: var(--sp-1);
+    transition:
+        background var(--duration-fast) var(--ease-default),
+        border-color var(--duration-fast) var(--ease-default);
+}
+
+.user-photo {
+    width: 26px; height: 26px;
+    border-radius: var(--radius-full);
+    border: 2px solid rgba(255,255,255,0.50);
+    object-fit: cover;
+}
+
+.user-photo-default {
+    width: 26px; height: 26px;
+    border-radius: var(--radius-full);
+    border: 2px solid rgba(255,255,255,0.40);
+    background: var(--user-avatar-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--user-avatar-color);
+    font-size: 12px;
+}
+
+.user-name {
+    color: var(--text-1);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    white-space: nowrap;
+}
+
+/* ══════════════════════════════════════════
+   THEME SWITCH (다크/라이트 토글)
+   ══════════════════════════════════════════ */
+.theme-switch {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    margin-right: 4px;
+    user-select: none;
+}
+
+.theme-switch input[type="checkbox"] {
+    display: none;
+}
+
+.switch-track {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: rgba(59,108,247,0.15);
+    border: 1px solid rgba(59,108,247,0.25);
+    transition:
+        background var(--duration-normal) var(--ease-default),
+        border-color var(--duration-normal) var(--ease-default);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.10);
+}
+
+[data-theme="dark"] .switch-track {
+    background: rgba(79,142,247,0.25);
+    border-color: rgba(79,142,247,0.40);
+}
+
+.switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full);
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.20);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--duration-normal) var(--ease-default),
+                background var(--duration-normal) var(--ease-default);
+    font-size: 9px;
+    color: var(--accent);
+}
+
+.theme-switch input:checked ~ .switch-track .switch-thumb {
+    transform: translateX(20px);
+    background: var(--accent);
+    color: #ffffff;
+}
+
+/* 아이콘 전환 */
+.switch-thumb .icon-sun  { display: block; }
+.switch-thumb .icon-moon { display: none; }
+
+.theme-switch input:checked ~ .switch-track .switch-thumb .icon-sun  { display: none; }
+.theme-switch input:checked ~ .switch-track .switch-thumb .icon-moon { display: block; }
+
+/* ══════════════════════════════════════════
+   APP BODY
+   ══════════════════════════════════════════ */
+#app-body {
+    display: flex;
+    gap: var(--sp-2);
+    height: calc(100vh - var(--topbar-h) - 26px);
+    margin-top: calc(var(--topbar-h) + 16px);
+    padding: 0 12px 12px;
+}
+
+/* ── Sidebar Backdrop ── */
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-sidebar) - 1);
+    background: rgba(0,0,0,0.25);
+    /* blur 제거 — GPU 레이어 충돌 방지 */
+}
+
+.sidebar-open .sidebar-backdrop { display: block; }
+
+/* ══════════════════════════════════════════
+   SIDEBAR
+   ══════════════════════════════════════════ */
+#sidebar {
+    width: var(--sidebar-w);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-radius: var(--radius-lg);
+    transition:
+        width .22s var(--ease-default),
+        opacity .22s var(--ease-default),
+        background var(--duration-normal) var(--ease-default),
+        border-color var(--duration-normal) var(--ease-default),
+        border-radius var(--duration-normal) var(--ease-default),
+        box-shadow var(--duration-normal) var(--ease-default);
+
+    background: var(--sidebar-bg);
+    border: 1px solid var(--sidebar-border);
+    box-shadow: var(--sidebar-shadow);
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-20) transparent;
+}
+
+/* 라이트 사이드바 — border-right만 */
+:root:not([data-theme="dark"]) #sidebar {
+    border: none;
+    border-right: 1px solid #e5e7eb;
+    border-radius: 0;
+}
+
+/* 사이드바 — blur 없음 (GPU 렌더링 보호, 솔리드 배경) */
+/* 다크 사이드바 — accent blue border + subtle glow */
+[data-theme="dark"] #sidebar {
+    border-right: 1px solid rgba(79,142,247,0.20);
+}
+
+/* 다크 헤더 — 하단 accent blue 라인으로 통일감 */
+[data-theme="dark"] #topbar {
+    box-shadow: var(--topbar-shadow), var(--topbar-bottom-line);
+}
+
+/* 라이트 모드 — 헤더 blur 최소화 (탁함 방지, opacity 높여 solid하게) */
+:root:not([data-theme="dark"]) #topbar {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* 다크 모드 — 헤더 blur(10px) 유지 (딱 1개) */
+
+#sidebar::-webkit-scrollbar { width: 4px; }
+#sidebar::-webkit-scrollbar-thumb {
+    background: var(--accent-20);
+    border-radius: var(--radius-full);
+}
+#sidebar::-webkit-scrollbar-track { background: transparent; }
+
+/* ── Side Section ── */
+.side-section { padding: var(--sp-2) var(--sp-2); }
+.side-section.hidden { display: none; }
+
+/* ── Side Title ── */
+.side-title {
+    padding: 10px var(--sp-3) 6px;
+    font-size: 10px;
+    font-weight: var(--weight-bold);
+    color: var(--accent);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    opacity: 0.75;
+    margin-top: var(--sp-1);
+    position: relative;
+}
+
+.side-title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: var(--sp-3);
+    right: var(--sp-3);
+    height: 1px;
+    background: linear-gradient(90deg,
+        var(--accent-20),
+        var(--accent-10) 70%,
+        transparent
+    );
+    transition: background var(--duration-normal) var(--ease-default);
+}
+
+.side-title i,
+.side-item i { display: none; }
+
+/* 다크모드 — side-title 가시성 강화 */
+[data-theme="dark"] .side-title {
+    opacity: 0.90;
+}
+
+/* ── Side Item ── */
+.side-item {
+    display: block;
+    padding: 8px var(--sp-3);
+    color: var(--text-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    border-radius: var(--radius-md);
+    margin: 1px 0;
+    transition:
+        background var(--duration-fast) var(--ease-default),
+        color var(--duration-fast) var(--ease-default),
+        box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.side-item:visited { color: var(--text-2); }
+
+.side-item:hover {
+    background: var(--side-item-hover-bg);
+    color: var(--side-item-hover-color);
+    box-shadow: 0 2px 8px rgba(59,108,247,0.06),
+                inset 0 1px 0 rgba(255,255,255,0.50);
+}
+
+[data-theme="dark"] .side-item:hover {
+    box-shadow: none;
+}
+
+.side-item.active {
+    background: var(--side-item-active-bg);
+    color: var(--side-item-active-color);
+    font-weight: var(--weight-semibold);
+    border: 1px solid var(--side-item-active-border);
+    box-shadow: var(--side-item-active-shadow);
+}
+
+/* 다크에서는 active에 backdrop-filter 제거 (이미 배경이 어두움) */
+[data-theme="dark"] .side-item.active {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: var(--radius-sm);
+}
+
+/* 라이트에서는 border-radius만 */
+:root:not([data-theme="dark"]) .side-item.active {
+    border-radius: var(--radius-sm);
+}
+
+.side-item.active:visited { color: var(--side-item-active-color); }
+
+/* ══════════════════════════════════════════
+   CONTENT AREA
+   ══════════════════════════════════════════ */
+#content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: var(--sp-3);
+    min-width: 0;
+    border-radius: var(--radius-lg);
+    background: var(--content-bg);
+    border: 1px solid var(--content-border);
+    box-shadow: var(--content-shadow, none);
+    transition:
+        background var(--duration-normal) var(--ease-default),
+        border-color var(--duration-normal) var(--ease-default);
+
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-20) transparent;
+}
+
+#content::-webkit-scrollbar { width: 5px; }
+#content::-webkit-scrollbar-thumb {
+    background: var(--accent-20);
+    border-radius: var(--radius-full);
+}
+#content::-webkit-scrollbar-track { background: transparent; }
+
+/* ── Page Structure ──
+   .page-header    : flex row (제목 좌, 액션버튼 우) — mat views 전용
+   .page-header-row: flex row (components.css) — 신규 뷰에서는 이것을 사용
+   ※ page-header / page-title / page-subtitle 는 이 파일이 canonical, components.css 중복 없음 */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    padding: var(--sp-5) var(--sp-5) 0;
+}
+
+.page-title {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: var(--weight-bold);
+    color: var(--text-1);
+}
+
+.page-subtitle {
+    margin: 0;
+    font-size: var(--text-base);
+    color: var(--text-3);
+}
+
+.page-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+}
+
+/* ══════════════════════════════════════════
+   SIDEBAR COLLAPSED
+   ══════════════════════════════════════════ */
+.sidebar-collapsed #sidebar {
+    width: 0;
+    opacity: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+/* ══════════════════════════════════════════
+   DROPDOWN (보존)
+   ══════════════════════════════════════════ */
+.top-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    background: var(--panel);
+    /* blur 제거 — GPU 레이어 충돌 방지, 솔리드 배경으로 대체 */
+    border: 1px solid var(--topbar-border);
+    border-radius: var(--radius-md);
+    min-width: 170px;
+    padding: var(--sp-1) 0;
+    box-shadow: var(--shadow-lg);
+    z-index: var(--z-dropdown);
+}
+
+[data-theme="dark"] .top-dropdown {
+    background: #0f1c5c;
+}
+
+.top-dropdown.open {
+    display: block;
+    animation: dd-fade-in var(--duration-fast) var(--ease-out);
+}
+
+@keyframes dd-fade-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.top-dd-item {
+    display: block;
+    padding: 9px var(--sp-4);
+    color: var(--text-2);
+    font-size: var(--text-sm);
+    transition:
+        background var(--duration-fast) var(--ease-default),
+        color var(--duration-fast) var(--ease-default);
+}
+
+.top-dd-item:hover { background: var(--accent-10); color: var(--accent); }
+.top-dd-item.active { background: var(--accent-10); color: var(--accent); font-weight: var(--weight-bold); }
+
+/* ══════════════════════════════════════════
+   ACCORDION (보존)
+   ══════════════════════════════════════════ */
+.side-acc { border-bottom: 1px solid rgba(255,255,255,0.10); }
+
+.side-acc-head {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    padding: 10px var(--sp-3);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--text-2);
+    cursor: pointer;
+    border-radius: var(--radius-md);
+    transition: background var(--duration-fast) var(--ease-default), color var(--duration-fast) var(--ease-default);
+}
+
+.side-acc-head:hover { background: var(--side-item-hover-bg); color: var(--text-1); }
+.side-acc-head i:first-child { width: 14px; text-align: center; color: var(--accent); }
+
+.side-acc-arrow {
+    margin-left: auto;
+    font-size: 10px;
+    color: var(--text-3);
+    transition: transform var(--duration-fast) var(--ease-default);
+}
+
+.side-acc.open .side-acc-arrow { transform: rotate(90deg); }
+.side-acc-body { display: none; }
+.side-acc.open .side-acc-body { display: block; }
+
+/* ══════════════════════════════════════════
+   COPYRIGHT FOOTER
+   ══════════════════════════════════════════ */
+#shv-copyright {
+    position: fixed;
+    bottom: 0;
+    left: var(--sidebar-w, 200px);
+    right: 0;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--text-3);
+    background: var(--body-bg, #edf0f7);
+    letter-spacing: 0.2px;
+    z-index: 10;
+    user-select: none;
+    transition: left       var(--duration-normal) var(--ease-default),
+                background var(--duration-normal) var(--ease-default),
+                color      var(--duration-normal) var(--ease-default);
+}
+
+[data-theme="dark"] #shv-copyright {
+    background: #151c2e;
+}
+
+#shv-copyright strong {
+    font-weight: var(--weight-semibold);
+    color: var(--text-2);
+    margin: 0 2px;
+}
+
+#app-body.sidebar-collapsed #shv-copyright { left: 0; }
+
+#content { padding-bottom: calc(var(--sp-3) + 24px); }
+
+@media (max-width: 768px) {
+    #shv-copyright { left: 0; }
+}

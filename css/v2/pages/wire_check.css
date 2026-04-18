@@ -1,0 +1,359 @@
+/* ══════════════════════════════════════
+   배관배선 검토 (wire_check) 전용 CSS
+   화면 위→아래, 박스모델 기준 정렬
+   ══════════════════════════════════════ */
+
+/* ── 글로벌 설정 ── */
+.wc-settings {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    flex-wrap: wrap;
+}
+
+.wc-settings-label {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    color: var(--text-3);
+    white-space: nowrap;
+}
+
+.wc-settings-group {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+.wc-settings-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.wc-settings-item label {
+    font-size: var(--text-xs);
+    color: var(--text-2);
+    white-space: nowrap;
+}
+
+.wc-settings-item input {
+    width: 60px;
+    padding: 3px 6px;
+    font-size: var(--text-xs);
+    color: var(--text-1);
+    background: var(--glass-bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    text-align: right;
+}
+
+.wc-settings-item input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: var(--shadow-focus);
+}
+
+/* ── 검색 ── */
+.wc-filter-sel {
+    padding: 5px 8px;
+    font-size: var(--text-xs);
+    color: var(--text-1);
+    background: var(--glass-bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    outline: none;
+    cursor: pointer;
+}
+.wc-filter-sel:focus {
+    border-color: var(--accent);
+}
+
+.wc-search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.wc-search-icon {
+    position: absolute;
+    left: 8px;
+    font-size: 11px;
+    color: var(--text-3);
+    pointer-events: none;
+}
+
+.wc-search-input {
+    width: 180px;
+    padding: 5px 8px 5px 26px;
+    font-size: var(--text-xs);
+    color: var(--text-1);
+    background: var(--glass-bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+.wc-search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: var(--shadow-focus);
+}
+
+.wc-search-input::placeholder {
+    color: var(--text-3);
+}
+
+.wc-settings-hint {
+    font-size: 10px;
+    color: var(--text-3);
+    margin-left: auto;
+}
+
+.wc-settings-hint b {
+    color: var(--accent);
+}
+
+/* ── 테이블 ── */
+.wc-table-wrap {
+    overflow-x: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.wc-table {
+    width: 100%;
+    min-width: 1520px;
+    border-collapse: collapse;
+    font-size: var(--text-xs);
+    table-layout: fixed;
+}
+
+/* 헤더 */
+.wc-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 6px 4px;
+    font-size: 10px;
+    font-weight: var(--weight-bold);
+    color: var(--text-3);
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    background: var(--panel);
+    border-bottom: 2px solid var(--border-strong);
+    text-align: center;
+}
+
+.wc-th-calc {
+    color: var(--warn) !important;
+    background: rgba(245, 166, 35, 0.06) !important;
+}
+
+.wc-th-primary {
+    background: rgba(245, 166, 35, 0.12) !important;
+}
+
+.wc-th-review {
+    color: var(--accent) !important;
+    background: var(--accent-10) !important;
+}
+
+/* 정렬 헤더 */
+.wc-sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 14px !important;
+}
+.wc-sortable:hover {
+    color: var(--accent) !important;
+}
+.wc-sortable::after {
+    content: '⇅';
+    position: absolute;
+    right: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    opacity: 0.3;
+}
+.wc-sort-asc::after {
+    content: '▲';
+    opacity: 0.8;
+    color: var(--accent);
+}
+.wc-sort-desc::after {
+    content: '▼';
+    opacity: 0.8;
+    color: var(--accent);
+}
+
+/* 데이터 행 */
+.wc-table tbody tr.wc-data-row {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background var(--duration-fast);
+}
+
+.wc-table tbody tr.wc-data-row:hover {
+    background: var(--accent-10);
+}
+
+.wc-table tbody tr.wc-data-row:nth-child(even) {
+    background: var(--panel-2);
+}
+
+.wc-table tbody tr.wc-data-row:nth-child(even):hover {
+    background: var(--accent-10);
+}
+
+/* 셀 */
+.wc-table td {
+    padding: 5px 4px;
+    vertical-align: middle;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* No 열 */
+.wc-td-no {
+    position: relative;
+}
+
+.wc-no {
+    font-size: 10px;
+    color: var(--text-3);
+}
+
+.wc-btn-del {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--text-3);
+    font-size: 9px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--duration-fast), background var(--duration-fast);
+}
+
+.wc-data-row:hover .wc-btn-del {
+    opacity: 1;
+}
+
+.wc-btn-del:hover {
+    background: var(--danger-10);
+    color: var(--danger);
+}
+
+/* 입력값 셀 */
+.wc-click {
+    color: var(--text-1);
+}
+
+/* 계산 셀 */
+.wc-calc {
+    color: var(--text-2);
+    font-weight: var(--weight-semibold);
+}
+
+.wc-calc-primary {
+    color: var(--text-1);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-sm);
+    background: rgba(245, 166, 35, 0.06);
+}
+
+/* GAP */
+.wc-gap-pos  { color: #16a34a; font-weight: var(--weight-semibold); }
+.wc-gap-neg  { color: var(--danger); font-weight: var(--weight-semibold); }
+.wc-gap-zero { color: var(--text-3); }
+
+[data-theme="dark"] .wc-gap-pos { color: #4ade80; }
+[data-theme="dark"] .wc-gap-neg { color: #ff6b88; }
+
+/* 서브행 */
+.wc-sub-line {
+    padding: 2px 8px;
+    font-size: var(--text-xs);
+    color: var(--text-2);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-2);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.wc-sub-tag {
+    font-size: 10px;
+    color: var(--text-3);
+    margin-right: 6px;
+}
+
+/* 합계 행 */
+.wc-row-total td {
+    padding: 7px 4px;
+    font-weight: var(--weight-bold);
+    font-size: var(--text-sm);
+    border-top: 2px solid var(--accent-20);
+    background: var(--accent-10);
+}
+
+/* 빈 상태 */
+.wc-empty {
+    padding: var(--sp-10) var(--sp-4);
+    text-align: center;
+}
+
+.wc-empty-icon { font-size: 28px; color: var(--text-3); margin-bottom: var(--sp-2); }
+.wc-empty-text { font-size: var(--text-sm); color: var(--text-3); margin: 0 0 var(--sp-3); }
+
+/* 하단 */
+.wc-footer-bar {
+    padding: var(--sp-2) var(--sp-4);
+    border-top: 1px solid var(--border);
+}
+
+.wc-row-count { font-size: var(--text-xs); color: var(--text-3); }
+.wc-row-count b { color: var(--accent); }
+
+/* ══════════════════════════════════
+   모달 폼
+   ══════════════════════════════════ */
+.wc-mf { padding: var(--sp-2) 0; }
+
+.wc-mf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-3) var(--sp-4);
+    padding: 0 var(--sp-4);
+}
+
+.wc-mf-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.wc-mf-mt { margin-top: var(--sp-1); }
+
+.wc-mf-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-2);
+    padding: var(--sp-4);
+    border-top: 1px solid var(--border);
+    margin-top: var(--sp-4);
+}
+
+/* ── 반응형 ── */
+@media (max-width: 768px) {
+    .wc-settings-hint { display: none; }
+    .wc-mf-grid { grid-template-columns: 1fr; }
+    .wc-table { min-width: 1200px; }
+}

@@ -1,0 +1,24 @@
+{
+    "name": "shvq-v2-mail-worker",
+    "version": "2.0.0",
+    "description": "SHVQ V2 IMAP IDLE + WebSocket 실시간 메일 알림 서버",
+    "main": "worker.js",
+    "scripts": {
+        "start": "node worker.js",
+        "start:verbose": "node worker.js --verbose",
+        "pm2:start": "pm2 start ecosystem.config.js",
+        "pm2:stop": "pm2 stop shv-v2-mail-worker",
+        "pm2:restart": "pm2 restart shv-v2-mail-worker",
+        "pm2:logs": "pm2 logs shv-v2-mail-worker"
+    },
+    "dependencies": {
+        "firebase-admin": "^12.7.0",
+        "imapflow": "^1.0.164",
+        "ioredis": "^5.3.2",
+        "mssql": "^10.0.4",
+        "ws": "^8.17.1"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    }
+}

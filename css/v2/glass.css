@@ -1,0 +1,137 @@
+/* ========================================
+   SHVQ V2 — Liquid Glass Utilities
+   ※ .glass-* 유틸리티 클래스: backdrop-filter 제거 (GPU 렌더링 보호)
+     컴포넌트 전용 blur는 components.css에서 유지:
+       - #topbar (layout.css, blur 10px)
+       - .modal-overlay, .modal-box (blur 12-20px)
+       - .btn-glass-primary (blur 12px)
+       - dark-mode form input (blur 6px)
+       - toast/notification (blur 18px)
+   ======================================== */
+
+/* ── Base Glass ── */
+.glass {
+    background: var(--glass-bg);
+    /* backdrop-filter 제거 */
+    border: var(--glass-border);
+    box-shadow: var(--shadow-md);
+}
+
+/* ── Glass Strong (sidebar, topbar) ── */
+.glass-strong {
+    background: var(--glass-bg-strong);
+    /* backdrop-filter 제거 */
+    border: var(--glass-border-strong);
+    box-shadow: var(--shadow-md);
+}
+
+/* ── Glass Card ── */
+.glass-card {
+    background: var(--glass-bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: var(--glass-border);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-lg);
+}
+
+/* ── Glass Panel (sidebar, drawer) ── */
+.glass-panel {
+    background: linear-gradient(to bottom, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.08) 100%);
+    /* backdrop-filter 제거 */
+    border: var(--glass-border);
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-lg);
+}
+
+/* ── Glass Input ── */
+.glass-input {
+    background: var(--glass-bg-input);
+    border: var(--glass-input-border);
+    border-radius: var(--radius-sm);
+    transition: border-color var(--duration-fast) var(--ease-default),
+                box-shadow var(--duration-fast) var(--ease-default);
+}
+
+.glass-input:focus,
+.glass-input:focus-within {
+    border-color: var(--accent);
+    box-shadow: var(--glass-input-focus);
+}
+
+/* ── Glass Modal Backdrop ── */
+.glass-modal-backdrop {
+    background: rgba(0,0,0,0.40);
+    /* backdrop-filter 제거 — 모달 배경은 솔리드 처리 */
+}
+
+/* ── Glass Hover ── */
+.glass-hover {
+    transition: background var(--duration-fast) var(--ease-default);
+}
+
+.glass-hover:hover {
+    background: var(--glass-bg-hover);
+}
+
+/* ── Glass Active (sidebar active item) ── */
+.glass-active {
+    background: linear-gradient(135deg, rgba(26,58,110,0.75), rgba(41,82,163,0.80));
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: 0 4px 14px rgba(41,82,163,0.20),
+                inset 0 0 0 1px rgba(255,255,255,0.10);
+    /* backdrop-filter 제거 */
+    color: var(--text-inverse);
+}
+
+/* ════════════════════════════════════════
+   LIGHT MODE — Liquid Glass Light
+   ════════════════════════════════════════ */
+:root:not([data-theme="dark"]) .glass,
+:root:not([data-theme="dark"]) .glass-strong,
+:root:not([data-theme="dark"]) .glass-card,
+:root:not([data-theme="dark"]) .glass-panel {
+    background: var(--card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+}
+
+:root:not([data-theme="dark"]) .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.12),
+        inset 0 1px 0 rgba(255,255,255,1),
+        inset 0 -1px 0 rgba(0,0,0,0.05);
+}
+
+:root:not([data-theme="dark"]) .glass-active {
+    background: var(--side-item-active-bg);
+    border: 1px solid var(--side-item-active-border);
+    box-shadow: var(--side-item-active-shadow);
+    color: var(--side-item-active-color);
+}
+
+:root:not([data-theme="dark"]) .glass-hover:hover {
+    background: var(--side-item-hover-bg);
+}
+
+/* ════════════════════════════════════════
+   DARK MODE — Liquid Glass Dark
+   ════════════════════════════════════════ */
+[data-theme="dark"] .glass,
+[data-theme="dark"] .glass-strong,
+[data-theme="dark"] .glass-card,
+[data-theme="dark"] .glass-panel {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+[data-theme="dark"] .glass-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.70),
+        inset 0 1px 0 rgba(255,255,255,0.30),
+        inset 0 -1px 0 rgba(255,255,255,0.05);
+}

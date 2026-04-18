@@ -1,0 +1,324 @@
+/* ========================================
+   SHVQ V2 — Design Tokens
+   Liquid Glass Design System
+   ======================================== */
+
+:root {
+    /* ── Color: Base ── */
+    --bg: #f0f2f5;
+    --bg-grad:
+        radial-gradient(1180px 700px at 12% 22%, rgba(147,197,253,.34), transparent 60%),
+        radial-gradient(1080px 640px at 88% 10%, rgba(196,181,253,.28), transparent 56%),
+        radial-gradient(860px 520px at 50% 46%, rgba(255,255,255,.56), transparent 58%),
+        linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+    --panel: #ffffff;
+    --panel-2: #f8fafc;
+    --bg-2: #f5f7fa;      /* 테이블 행/열 구분 배경 */
+    --bg-3: #eef1f6;      /* 테이블 헤더/고정 배경 */
+    --border: #e4e9f0;
+    --border-strong: #cdd5e0;
+
+    /* ── Color: Brand ── */
+    --accent: #3b6cf7;
+    --accent-hover: #2952cc;
+    --accent-active: #1e3fa3;
+    --accent-10: rgba(59,108,247,0.10);
+    --accent-15: rgba(59,108,247,0.15);
+    --accent-20: rgba(59,108,247,0.20);
+    --accent-30: rgba(59,108,247,0.30);
+    --accent-50: rgba(59,108,247,0.50);
+
+    /* ── Color: Semantic ── */
+    --danger: #ff4466;
+    --danger-hover: #e63356;
+    --danger-10: rgba(255,68,102,0.10);
+    --danger-15: rgba(255,68,102,0.15);
+    --danger-30: rgba(255,68,102,0.30);
+
+    --success: #00c878;
+    --success-hover: #00a864;
+    --success-10: rgba(0,200,120,0.10);
+    --success-15: rgba(0,200,120,0.15);
+    --success-30: rgba(0,200,120,0.30);
+
+    --warn: #f5a623;
+    --warn-hover: #d9901a;
+    --warn-10: rgba(245,166,35,0.10);
+    --warn-15: rgba(245,166,35,0.15);
+    --warn-30: rgba(245,166,35,0.30);
+
+    --info: #2aafd4;
+    --info-10: rgba(42,175,212,0.10);
+
+    /* ── Color: Text ── */
+    --text-1: #1a2a40;
+    --text-2: #4a5a72;
+    --text-3: #8a9ab4;
+    --text-inverse: #ffffff;
+
+    /* ── Typography ── */
+    --font-base: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+
+    --text-xs: 11px;
+    --text-sm: 12px;
+    --text-base: 13px;
+    --text-md: 14px;
+    --text-lg: 16px;
+    --text-xl: 18px;
+    --text-2xl: 22px;
+    --text-3xl: 28px;
+
+    --leading-tight: 1.3;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.7;
+
+    --weight-normal: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+    --weight-extrabold: 800;
+
+    /* ── Spacing (4px scale) ── */
+    --sp-0: 0;
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 20px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+    --sp-10: 40px;
+    --sp-12: 48px;
+    --sp-16: 64px;
+
+    /* ── Border Radius ── */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-full: 9999px;
+
+    /* ── Shadows ── */
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+    --shadow-md: 0 8px 20px rgba(0,0,0,0.08),
+                 inset 0 1.5px 0 rgba(255,255,255,0.90),
+                 inset 0 -1px 0 rgba(0,0,0,0.05);
+    --shadow-lg: 0 12px 30px rgba(0,0,0,0.10),
+                 inset 0 1.5px 0 rgba(255,255,255,0.95),
+                 inset 0 -1px 0 rgba(0,0,0,0.05);
+    --shadow-focus: 0 0 0 3px var(--accent-15);
+    --shadow-danger-focus: 0 0 0 3px var(--danger-15);
+
+    /* ── Liquid Glass ── */
+    /* --glass-blur 제거 — 유일한 blur는 #topbar blur(10px)만 허용 */
+    --glass-bg: rgba(255,255,255,0.15);
+    --glass-bg-strong: rgba(255,255,255,0.25);
+    --glass-bg-card: linear-gradient(to bottom, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.10) 100%);
+    --glass-bg-input: rgba(255,255,255,0.40);
+    --glass-bg-hover: rgba(255,255,255,0.30);
+    --glass-border: 1px solid rgba(255,255,255,0.32);
+    --glass-border-strong: 1px solid rgba(255,255,255,0.45);
+    --glass-input-border: 1px solid rgba(59,108,247,0.18);
+    --glass-input-focus: 0 0 0 3px rgba(59,108,247,0.12);
+
+    /* ── Layout ── */
+    --topbar-h: 60px;
+    --sidebar-w: 200px;
+    --sidebar-w-collapsed: 0px;
+    --content-max: 1400px;
+    --page-padding: var(--sp-4);
+
+    /* ── Transition ── */
+    --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+
+    /* ── Z-Index ── */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-sidebar: 800;
+    --z-topbar: 900;
+    --z-modal-backdrop: 1000;
+    --z-modal: 1010;
+    --z-toast: 1100;
+    --z-tooltip: 1200;
+
+    /* ── Body Background (Light — Liquid Glass) ── */
+    --body-bg:
+        radial-gradient(circle at 18% 20%, rgba(219,234,254,0.80), transparent 50%),
+        radial-gradient(circle at 82% 80%, rgba(224,242,254,0.70), transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255,255,255,0.40), transparent 60%),
+        linear-gradient(#f4f6f9, #f4f6f9);
+
+    /* ── Layout Tokens (light — 완전 별도 테마) ── */
+    --topbar-bg:             rgba(255,255,255,0.90);
+    --topbar-border:         rgba(229,231,235,0.90);
+    --topbar-shadow:         0 2px 10px rgba(0,0,0,0.05);
+
+    --sidebar-bg:            #f1f5f9;
+    --sidebar-border:        #e5e7eb;
+    --sidebar-shadow:        2px 0 12px rgba(0,0,0,0.08);
+
+    --content-bg:            #f3f5f8;
+    --content-border:        rgba(220,226,236,0.70);
+    --content-shadow:        0 8px 32px rgba(59,108,247,0.10),
+                             0 2px 8px rgba(0,0,0,0.06);
+
+    --card-bg:               rgba(255,255,255,0.72);
+    --card-border:           rgba(255,255,255,0.95);
+    --card-shadow:           inset 0 1px 0 rgba(255,255,255,0.98),
+                             inset 0 -1px 0 rgba(0,0,0,0.04),
+                             0 6px 18px rgba(0,0,0,0.06);
+
+    --top-btn-hover-bg:      rgba(37,99,235,0.06);
+    --top-btn-active-bg:     rgba(37,99,235,0.10);
+    --top-btn-active-shadow: 0 0 0 1px rgba(37,99,235,0.18);
+    --top-btn-active-border: rgba(37,99,235,0.18);
+
+    --icon-btn-hover-bg:     rgba(0,0,0,0.05);
+
+    --user-pill-bg:          #ffffff;
+    --user-pill-border:      #e5e7eb;
+    --user-avatar-bg:        linear-gradient(135deg, rgba(37,99,235,0.12), rgba(2,132,199,0.12));
+    --user-avatar-color:     var(--accent);
+
+    --side-item-hover-bg:    #e8edf5;
+    --side-item-hover-color: var(--text-1);
+    --side-item-active-bg:   #e0e7ff;
+    --side-item-active-color: #4f46e5;
+    --side-item-active-border: #c7d2fe;
+    --side-item-active-shadow: inset 3px 0 0 #6366f1,
+                               0 1px 4px rgba(99,102,241,0.15);
+
+    /* ── 라이트 본문 scrollbar ── */
+    --scrollbar-thumb:   rgba(59,108,247,0.18);
+    --scrollbar-thumb-h: rgba(59,108,247,0.32);
+
+    /* ── Skeleton ── */
+    --skeleton-base:  rgba(0,0,0,0.06);
+    --skeleton-shine: rgba(255,255,255,0.65);
+
+    /* ── Status Semantic (badge-status-* 별칭용) ── */
+    --status-active-bg:   var(--success-10);
+    --status-active-fg:   var(--success);
+    --status-inactive-bg: rgba(0,0,0,0.06);
+    --status-inactive-fg: var(--text-3);
+    --status-pending-bg:  var(--warn-10);
+    --status-pending-fg:  var(--warn);
+    --status-cancel-bg:   var(--danger-10);
+    --status-cancel-fg:   var(--danger);
+    --status-draft-bg:    var(--accent-10);
+    --status-draft-fg:    var(--accent);
+}
+
+/* ════════════════════════════════════════
+   DARK THEME OVERRIDES
+   ════════════════════════════════════════ */
+[data-theme="dark"] {
+    /* ── Body Background (Dark — Liquid Glass) ── */
+    --body-bg:
+        radial-gradient(circle at 15% 20%, #1e3a8a, transparent),
+        radial-gradient(circle at 85% 80%, #0ea5e9, transparent),
+        linear-gradient(#0b1220, #0b1220);
+
+    /* ── Text ── */
+    --text-1:   #e2e8f4;
+    --text-2:   #8fa3c8;
+    --text-3:   #506080;
+
+    /* ── Brand ── */
+    --accent:       #4f8ef7;
+    --accent-hover: #3b7af5;
+    --accent-10:    rgba(79,142,247,0.10);
+    --accent-15:    rgba(79,142,247,0.15);
+    --accent-20:    rgba(79,142,247,0.20);
+    --accent-30:    rgba(79,142,247,0.30);
+    --accent-50:    rgba(79,142,247,0.50);
+
+    /* ── Glass ── */
+    --glass-bg:          rgba(20,30,60,0.45);
+    --glass-bg-strong:   rgba(15,22,50,0.70);
+    --glass-bg-card:     linear-gradient(to bottom, rgba(30,44,80,0.55) 0%, rgba(15,22,48,0.45) 100%);
+    --glass-bg-input:    rgba(255,255,255,0.05);
+    --glass-bg-hover:    rgba(255,255,255,0.07);
+    --glass-border:      1px solid rgba(255,255,255,0.08);
+    --glass-border-strong: 1px solid rgba(255,255,255,0.14);
+    --glass-input-border:  1px solid rgba(255,255,255,0.10);
+
+    /* ── Shadows ── */
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.40);
+    --shadow-md: 0 12px 40px rgba(0,0,0,0.50),
+                 inset 0 1.5px 0 rgba(255,255,255,0.25),
+                 inset 0 -1px 0 rgba(255,255,255,0.05);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.60),
+                 inset 0 1.5px 0 rgba(255,255,255,0.28),
+                 inset 0 -1px 0 rgba(255,255,255,0.05);
+
+    /* ── Layout Glass Tokens (dark) ── */
+    --topbar-bg:             rgba(15,25,60,0.60);
+    --topbar-border:         rgba(255,255,255,0.10);
+    --topbar-shadow:         0 4px 24px rgba(0,0,0,0.50),
+                             inset 0 1px 0 rgba(255,255,255,0.06);
+    --topbar-bottom-line:    inset 0 -1px 0 rgba(79,142,247,0.12);
+
+    --sidebar-bg:            linear-gradient(180deg, #1e3a82 0%, #0f1c5c 60%, #0c1645 100%);
+    --sidebar-border:        rgba(255,255,255,0.10);
+    --sidebar-shadow:        inset 0 1px 0 rgba(255,255,255,0.06),
+                             2px 0 12px rgba(79,142,247,0.08),
+                             4px 0 24px rgba(0,0,0,0.40);
+
+    --card-bg:               rgba(20,30,60,0.38);
+    --card-border:           rgba(255,255,255,0.18);
+    --card-shadow:           inset 0 1px 0 rgba(255,255,255,0.25),
+                             inset 0 -1px 0 rgba(255,255,255,0.05),
+                             0 16px 45px rgba(0,0,0,0.60);
+
+    --content-bg:            rgba(15,22,40,0.20);
+    --content-border:        rgba(255,255,255,0.07);
+    --content-shadow:        none;
+
+    /* ── 다크 테이블 헤더 배경 ── */
+    --panel-2:               rgba(255,255,255,0.035);
+    --bg-2:                  rgba(255,255,255,0.04);
+    --bg-3:                  rgba(255,255,255,0.07);
+
+    --top-btn-hover-bg:      rgba(255,255,255,0.06);
+    --top-btn-active-bg:     rgba(79,142,247,0.18);
+    --top-btn-active-shadow: 0 0 0 1px rgba(79,142,247,0.30),
+                             inset 0 1px 0 rgba(79,142,247,0.20);
+    --top-btn-active-border: rgba(79,142,247,0.35);
+
+    --icon-btn-hover-bg:     rgba(255,255,255,0.07);
+
+    --user-pill-bg:          rgba(255,255,255,0.06);
+    --user-pill-border:      rgba(255,255,255,0.12);
+    --user-avatar-bg:        linear-gradient(135deg, rgba(79,142,247,0.30), rgba(56,189,248,0.30));
+    --user-avatar-color:     #7eb3ff;
+
+    --side-item-hover-bg:    rgba(255,255,255,0.08);
+    --side-item-hover-color: #e2e8f4;
+    --side-item-active-bg:   rgba(79,142,247,0.18);
+    --side-item-active-color: #90c2ff;
+    --side-item-active-border: rgba(79,142,247,0.30);
+    --side-item-active-shadow: inset 3px 0 0 #4f8ef7,
+                               0 1px 4px rgba(0,0,0,0.30);
+
+    /* ── 다크 본문 scrollbar ── */
+    --scrollbar-thumb:   rgba(79,142,247,0.20);
+    --scrollbar-thumb-h: rgba(79,142,247,0.35);
+
+    /* ── Skeleton (dark) ── */
+    --skeleton-base:  rgba(255,255,255,0.06);
+    --skeleton-shine: rgba(255,255,255,0.14);
+
+    /* ── Status Semantic (dark overrides) ── */
+    --status-inactive-bg: rgba(255,255,255,0.07);
+    --status-inactive-fg: var(--text-3);
+    --status-draft-bg:    rgba(79,142,247,0.14);
+    --status-draft-fg:    #90c2ff;
+}

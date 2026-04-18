@@ -1,0 +1,21 @@
+node_modules/
+node/node_modules/
+
+# Mac
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+.claude/
+
+# temp
+.tmp/
+.sync_backups/
+
+# env
+.env
+.env.*
+
+# logs
+*.log

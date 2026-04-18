@@ -1,0 +1,643 @@
+/* ══════════════════════════════════════
+   상세뷰 공용 CSS (detail-view.css)
+   본사/사업장/현장 상세 페이지 공통 컴포넌트
+   ══════════════════════════════════════
+   ① 라인 기반 구조 (border-bottom 스캔)
+   ② label 12px / value 14px 명확 분리
+   ③ 한 줄 4~5항목 고밀도
+   ④ 섹션 타이틀 좌측 액센트 바
+   ══════════════════════════════════════ */
+
+/* ── 다크모드 ── */
+[data-theme="dark"] .dv-header,
+[data-theme="dark"] .dv-sum-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .dv-info-section {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .dv-section-title {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+[data-theme="dark"] .dv-row-label {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+[data-theme="dark"] .dv-row-value {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+[data-theme="dark"] .dv-sum-label {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+[data-theme="dark"] .dv-sum-value {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+[data-theme="dark"] .dv-sum-sub {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* ── 상세뷰 헤더 ── */
+.dv-header {
+    padding: var(--sp-5) var(--sp-6);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--sp-3);
+}
+
+.dv-title {
+    font-size: 22px;
+    font-weight: var(--weight-extrabold);
+    color: var(--text-1);
+}
+
+.dv-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    white-space: nowrap;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-3);
+}
+
+.dv-sub-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+    margin-top: var(--sp-3);
+}
+
+/* ── 요약 카드 (KPI) ── */
+.dv-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--sp-3);
+    margin-bottom: var(--sp-3);
+}
+
+.dv-sum-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-md);
+    padding: var(--sp-4);
+}
+
+.dv-sum-label {
+    font-size: var(--text-xs);
+    color: var(--text-3);
+    font-weight: var(--weight-semibold);
+    margin-bottom: var(--sp-1);
+}
+
+.dv-sum-value {
+    font-size: 24px;
+    font-weight: var(--weight-extrabold);
+    color: var(--text-1);
+}
+
+.dv-sum-value small {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+}
+
+.dv-sum-sub {
+    font-size: var(--text-xs);
+    color: var(--text-3);
+    margin-top: 2px;
+}
+
+/* ══════════════════════════════════════
+   ① 라인 기반 정보 섹션
+   카드 → border-bottom 라인 스캔 구조
+   ══════════════════════════════════════ */
+
+.dv-info-body {
+    padding: var(--sp-4);
+}
+
+/* ── 정보 섹션 (라인 구분) ── */
+.dv-info-section {
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+}
+
+.dv-info-section:first-child {
+    padding-top: 0;
+}
+
+.dv-info-section:last-child {
+    border-bottom: none;
+}
+
+/* ── ④ 섹션 타이틀 (좌측 액센트 바) ── */
+.dv-section-title {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-2);
+    margin-bottom: 10px;
+}
+
+.dv-section-title::before {
+    content: "";
+    display: inline-block;
+    width: 3px;
+    height: 13px;
+    background: var(--accent);
+    margin-right: 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+/* ── ③ 고정 5열 그리드 (가로 정렬 통일) ── */
+.dv-row-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+
+/* ── ② label / value 명확 분리 ── */
+.dv-row-item {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 3px 0;
+    min-width: 0;
+}
+
+.dv-row-label {
+    font-size: 12px;
+    color: var(--text-3);
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.dv-row-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-1);
+    letter-spacing: 0.2px;
+    min-width: 0;
+    word-break: break-all;
+}
+
+.dv-row-value a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.dv-row-value a:hover {
+    text-decoration: underline;
+}
+
+/* ── 정보 중요도 계층 ── */
+.dv-row-value.dv-primary {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.dv-row-value.dv-secondary {
+    font-weight: 500;
+}
+
+.dv-row-value.dv-tertiary {
+    font-weight: 500;
+    opacity: 0.7;
+}
+
+/* ── 모노스페이스 숫자 값 (사업자번호/법인번호 등) ── */
+.dv-row-value.dv-mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.6px;
+    font-weight: 700;
+}
+
+/* ── 식별 정보 블록 (법인번호 + 사업자번호) ── */
+.dv-section-id {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    padding: 12px 16px;
+}
+
+[data-theme="dark"] .dv-section-id {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.dv-id-box {
+    display: flex;
+    gap: 32px;
+}
+
+.dv-id-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── 설명형 값 (주요사업 등 long text 전용) ── */
+.dv-desc-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-1);
+    line-height: 1.6;
+    letter-spacing: 0.2px;
+    margin-top: 4px;
+}
+
+/* ── 하이라이트 섹션 (주요사업 등 focal point) ── */
+.dv-section-highlight {
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .dv-section-highlight {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.07);
+}
+
+/* ── 주소 컴팩트 (한줄) ── */
+.dv-addr-compact {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+}
+
+.dv-addr-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-1);
+}
+
+/* ── 우편번호 ── */
+.dv-zip {
+    display: inline-block;
+    padding: 1px 6px;
+    background: var(--accent-10);
+    color: var(--accent);
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: var(--weight-bold);
+    font-family: monospace;
+    margin-right: 4px;
+}
+
+/* ── 사용견적 배지 ── */
+.dv-ue-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(0, 150, 255, 0.15);
+    border: 1px solid rgba(0, 150, 255, 0.3);
+    color: var(--accent);
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: var(--weight-semibold);
+    margin: 2px;
+}
+
+/* ── 단순 값 라인 (메모/첨부 등) ── */
+.dv-line-label {
+    font-size: 12px;
+    color: var(--text-3);
+    margin-bottom: 4px;
+}
+
+.dv-line-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-1);
+}
+
+/* ══════════════════════════════════════
+   레거시 호환 (이전 카드 기반 — 점진 제거)
+   ══════════════════════════════════════ */
+.dv-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+}
+
+.dv-info-card {
+    padding: var(--sp-3) var(--sp-4);
+}
+
+.dv-info-label {
+    font-size: 10px;
+    font-weight: var(--weight-bold);
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: var(--sp-1);
+}
+
+.dv-info-value {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    color: var(--text-1);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+}
+
+.dv-info-card-wide {
+    grid-column: 1 / -1;
+}
+
+/* ── 지도 팝업 → components.css 통합 ── */
+
+/* ── 커스텀 Prompt 모달 ── */
+.shv-prompt-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    padding: var(--sp-4);
+}
+
+.shv-prompt-box {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-5);
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.shv-prompt-title {
+    font-size: var(--text-md);
+    font-weight: var(--weight-bold);
+    color: var(--text-1);
+    margin-bottom: var(--sp-3);
+}
+
+.shv-prompt-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--text-1);
+    background: var(--card-bg);
+    outline: none;
+    box-sizing: border-box;
+}
+
+.shv-prompt-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 108, 247, 0.1);
+}
+
+.shv-prompt-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--sp-2);
+    margin-top: var(--sp-4);
+}
+
+.shv-prompt-cancel {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--card-bg);
+    color: var(--text-3);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+}
+
+.shv-prompt-cancel:hover {
+    background: var(--accent-10);
+}
+
+.shv-prompt-ok {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--accent);
+    color: #fff;
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    cursor: pointer;
+}
+
+.shv-prompt-ok:hover {
+    opacity: 0.9;
+}
+
+/* ── 반응형 ── */
+@media (max-width: 1024px) {
+    .dv-row-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dv-row-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dv-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dv-info-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .dv-row-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dv-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dv-addr-compact {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* ══════════════════════════════════════
+   인라인 편집 시스템
+   ══════════════════════════════════════ */
+
+/* ── 편집 가능 표시 ── */
+.dv-editable {
+    cursor: pointer;
+    position: relative;
+    border-radius: 3px;
+    transition: background var(--duration-fast);
+}
+
+.dv-editable:hover {
+    background: var(--accent-10);
+    text-decoration: underline dashed var(--accent-30) 1px;
+    text-underline-offset: 3px;
+}
+
+.dv-editable:hover::after {
+    content: '\f040';
+    font-family: FontAwesome;
+    margin-left: 6px;
+    font-size: 10px;
+    color: var(--accent-50);
+}
+
+/* ── 입력 컨트롤 (편집 중) ── */
+.dv-edit-input,
+.dv-edit-select {
+    width: 100%;
+    max-width: 280px;
+    padding: 3px 8px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-xs);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    background: var(--card-bg);
+    color: var(--text-1);
+    outline: none;
+    box-shadow: var(--shadow-focus);
+}
+
+.dv-edit-input.dv-edit-textarea {
+    max-width: 100%;
+    resize: vertical;
+    min-height: 40px;
+}
+
+.dv-edit-input.dv-edit-mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.6px;
+}
+
+[data-theme="dark"] .dv-edit-input,
+[data-theme="dark"] .dv-edit-select {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--accent);
+}
+
+/* ── 저장 중 ── */
+.dv-saving {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+/* ── 저장 완료 flash ── */
+@keyframes dv-saved-flash {
+    0% { background: rgba(0, 200, 120, 0.18); }
+    100% { background: transparent; }
+}
+
+.dv-saved {
+    animation: dv-saved-flash 0.8s ease-out;
+}
+
+/* ── 편집 중 hover 해제 ── */
+.dv-editable:has(.dv-edit-input),
+.dv-editable:has(.dv-edit-select) {
+    background: none;
+    text-decoration: none;
+}
+
+.dv-editable:has(.dv-edit-input)::after,
+.dv-editable:has(.dv-edit-select)::after {
+    content: none;
+}
+
+/* ── 검색 편집 래퍼 (인라인 style 대체) ── */
+.dv-edit-search-wrap {
+    position: relative;
+}
+
+/* ── 담당자 검색 드롭다운 ── */
+.dv-search-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: var(--z-dropdown);
+    min-width: 200px;
+    max-height: 180px;
+    overflow-y: auto;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md);
+    margin-top: 2px;
+}
+
+.dv-search-item {
+    padding: 6px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    color: var(--text-1);
+}
+
+.dv-search-item:hover,
+.dv-search-item.dv-search-active {
+    background: var(--accent-10);
+    color: var(--accent);
+}
+
+/* ── 주소 인라인 편집 ── */
+.dv-addr-edit-box {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.dv-addr-edit-box .dv-edit-input {
+    max-width: none;
+}
+
+.dv-addr-zip-input {
+    width: 80px !important;
+    flex-shrink: 0;
+}
+
+.dv-addr-search-btn {
+    padding: 3px 10px;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-xs);
+    background: var(--accent-10);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.dv-addr-search-btn:hover {
+    background: var(--accent-20);
+}
