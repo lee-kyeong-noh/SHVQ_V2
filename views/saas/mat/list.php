@@ -1070,6 +1070,16 @@ $patternBadgeMap = [
 
     var _tbl = null;
 
+    function _escHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function (ch) {
+            if (ch === '&') return '&amp;';
+            if (ch === '<') return '&lt;';
+            if (ch === '>') return '&gt;';
+            if (ch === '"') return '&quot;';
+            return '&#39;';
+        });
+    }
+
     /* ── 재조회 ── */
     function reload(p, extra) {
         var params = {
@@ -1183,11 +1193,12 @@ $patternBadgeMap = [
                 var html = '';
                 rows.forEach(function (r) {
                     var idx  = parseInt(r.idx || '0', 10);
-                    var code = r.item_code || '';
-                    var name = r.name      || '';
-                    var std  = r.standard  || '';
-                    var unit = r.unit      || '';
-                    var pat  = r.material_pattern || '';
+                    if (!isFinite(idx)) idx = 0;
+                    var code = _escHtml(r.item_code || '');
+                    var name = _escHtml(r.name || '');
+                    var std  = _escHtml(r.standard || '');
+                    var unit = _escHtml(r.unit || '');
+                    var pat  = _escHtml(r.material_pattern || '');
                     var sp   = parseFloat(r.sale_price || 0);
                     var cost = parseFloat(r.cost        || 0);
                     html += '<tr class="clickable" data-material-idx="' + idx + '" data-row-id="' + idx + '">'
@@ -1246,7 +1257,8 @@ $patternBadgeMap = [
         SHV.api.get(_api, { todo: 'v1_legacy_list', p: p || 1, limit: _state.limit, search: search })
             .then(function (res) {
                 var rows = (res && res.data && res.data.data) ? res.data.data : [];
-                var total = (res && res.data) ? (res.data.total || 0) : 0;
+                var total = (res && res.data) ? parseInt(res.data.total || '0', 10) : 0;
+                if (!isFinite(total)) total = 0;
                 var countEl = document.getElementById('matListCount');
                 if (countEl) countEl.textContent = total.toLocaleString() + '건';
                 if (!rows.length) {
@@ -1256,11 +1268,12 @@ $patternBadgeMap = [
                 var html = '';
                 rows.forEach(function (r) {
                     var idx    = parseInt(r.idx || '0', 10);
-                    var code   = r.item_code || '';
-                    var name   = r.name || '';
-                    var std    = r.standard || '';
-                    var unit   = r.unit || '';
-                    var pat    = r.material_pattern || '';
+                    if (!isFinite(idx)) idx = 0;
+                    var code   = _escHtml(r.item_code || '');
+                    var name   = _escHtml(r.name || '');
+                    var std    = _escHtml(r.standard || '');
+                    var unit   = _escHtml(r.unit || '');
+                    var pat    = _escHtml(r.material_pattern || '');
                     var sp     = parseFloat(r.sale_price || 0);
                     var cost   = parseFloat(r.cost || 0);
                     var isCopied = r.is_migrated || r.is_copied ? 1 : 0;

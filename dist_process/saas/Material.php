@@ -286,6 +286,9 @@ try {
 
     if (in_array($todo, $listTodos, true)) {
         $query = $_GET + $_POST;
+        if (!array_key_exists('exclude_component', $query) && array_key_exists('exclude_child', $query)) {
+            $query['exclude_component'] = $query['exclude_child'];
+        }
         $result = $service->list($query);
         $catQuery = [
             'limit' => 500,
@@ -371,7 +374,7 @@ try {
     }
 
     if (in_array($todo, $compSearchTodos, true)) {
-        $q = trim((string)($_GET['q'] ?? $_POST['q'] ?? ''));
+        $q = trim((string)($_GET['q'] ?? $_POST['q'] ?? $_GET['search'] ?? $_POST['search'] ?? ''));
         $tabIdx = (int)($_GET['tab_idx'] ?? $_POST['tab_idx'] ?? 0);
         $categoryIdx = (int)($_GET['category_idx'] ?? $_POST['category_idx'] ?? $_GET['cat_idx'] ?? $_POST['cat_idx'] ?? 0);
         $limit = min(50, max(1, (int)($_GET['limit'] ?? $_POST['limit'] ?? 20)));

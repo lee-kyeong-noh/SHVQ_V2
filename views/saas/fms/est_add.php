@@ -244,7 +244,7 @@ window.eaOpenPick = function () {
     var url = 'views/saas/fms/est_pick.php?member_idx=' + (_memberIdx || 0) + '&site_idx=' + (_siteIdx || 0);
     SHV.subModal.openHtml(
         '<div class="text-center p-8 text-3"><span class="spinner spinner-md mr-2"></span>로딩 중...</div>',
-        '품목 검색', 'xl'
+        '품목 검색', 'lg'
     );
     fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(function (r) {
@@ -252,11 +252,11 @@ window.eaOpenPick = function () {
             if (!r.ok) throw new Error('HTTP ' + r.status);
             return r.text();
         })
-        .then(function (html) { if (html) SHV.subModal.openHtml(html, '품목 검색', 'xl'); })
+        .then(function (html) { if (html) SHV.subModal.openHtml(html, '품목 검색', 'lg'); })
         .catch(function () {
             SHV.subModal.openHtml(
                 '<div class="text-center p-8 text-danger">불러오기 실패</div>',
-                '품목 검색', 'xl'
+                '품목 검색', 'lg'
             );
         });
 };
