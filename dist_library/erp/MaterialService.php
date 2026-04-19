@@ -38,6 +38,7 @@ final class MaterialService
             ? 'parent_idx'
             : ($this->columnExists('Tb_Item', 'parent_item_idx') ? 'parent_item_idx' : null);
         $materialPattern = trim((string)($query['material_pattern'] ?? $query['materialPattern'] ?? ''));
+        $excludeComponent = ((int)($query['exclude_component'] ?? $query['exclude_child'] ?? 0)) === 1;
         $page = max(1, (int)($query['p'] ?? 1));
         $limit = min(500, max(1, (int)($query['limit'] ?? 50)));
         $includeDeleted = ((int)($query['include_deleted'] ?? 0)) === 1;
@@ -97,6 +98,32 @@ final class MaterialService
             $where[] = 'i.' . $this->qi('material_pattern') . ' = ?';
             $params[] = $materialPattern;
         }
+        if ($excludeComponent) {
+            if ($this->columnExists('Tb_Item', 'material_pattern')) {
+                $where[] = "ISNULL(i." . $this->qi('material_pattern') . ", N'') <> N'구성품'";
+            }
+            if ($this->tableExists('Tb_ItemComponent') && $this->columnExists('Tb_ItemComponent', 'child_item_idx')) {
+                $componentWhere = 'ISNULL(icx.' . $this->qi('child_item_idx') . ', 0) = i.' . $this->qi('idx');
+                if ($this->columnExists('Tb_ItemComponent', 'is_deleted')) {
+                    $componentWhere .= ' AND ISNULL(icx.' . $this->qi('is_deleted') . ', 0) = 0';
+                }
+                $where[] = 'NOT EXISTS (SELECT 1 FROM Tb_ItemComponent icx WHERE ' . $componentWhere . ')';
+            } elseif ($this->tableExists('Tb_ItemChild')) {
+                $childCol = null;
+                if ($this->columnExists('Tb_ItemChild', 'child_item_idx')) {
+                    $childCol = 'child_item_idx';
+                } elseif ($this->columnExists('Tb_ItemChild', 'child_idx')) {
+                    $childCol = 'child_idx';
+                }
+                if ($childCol !== null) {
+                    $childWhere = 'ISNULL(icx.' . $this->qi($childCol) . ', 0) = i.' . $this->qi('idx');
+                    if ($this->columnExists('Tb_ItemChild', 'is_deleted')) {
+                        $childWhere .= ' AND ISNULL(icx.' . $this->qi('is_deleted') . ', 0) = 0';
+                    }
+                    $where[] = 'NOT EXISTS (SELECT 1 FROM Tb_ItemChild icx WHERE ' . $childWhere . ')';
+                }
+            }
+        }
 
         $attributeFilter = trim((string)($query['attribute'] ?? ''));
         if ($attributeFilter !== '' && $this->columnExists('Tb_Item', 'attribute')) {
@@ -147,6 +174,23 @@ final class MaterialService
         }
         $orderParts[] = 'i.' . $this->qi('idx') . ' DESC';
 
+        $componentCountExpr = '0';
+        $childTotalPriceExpr = '0';
+        if ($this->tableExists('Tb_ItemComponent') && $this->columnExists('Tb_ItemComponent', 'parent_item_idx')) {
+            $countWhere = 'ic.' . $this->qi('parent_item_idx') . ' = i.' . $this->qi('idx');
+            if ($this->columnExists('Tb_ItemComponent', 'is_deleted')) {
+                $countWhere .= ' AND ISNULL(ic.' . $this->qi('is_deleted') . ', 0) = 0';
+            }
+            $componentCountExpr = '(SELECT COUNT(*) FROM Tb_ItemComponent ic WHERE ' . $countWhere . ')';
+            if ($this->columnExists('Tb_ItemComponent', 'child_item_idx') && $this->columnExists('Tb_ItemComponent', 'qty') && $this->columnExists('Tb_Item', 'sale_price')) {
+                $sumWhere = $countWhere;
+                if ($this->columnExists('Tb_Item', 'is_deleted')) {
+                    $sumWhere .= ' AND ISNULL(ci.' . $this->qi('is_deleted') . ', 0) = 0';
+                }
+                $childTotalPriceExpr = '(SELECT ISNULL(SUM(ISNULL(ic.' . $this->qi('qty') . ', 0) * ISNULL(ci.' . $this->qi('sale_price') . ", 0)), 0) FROM Tb_ItemComponent ic INNER JOIN Tb_Item ci ON ci." . $this->qi('idx') . ' = ic.' . $this->qi('child_item_idx') . ' WHERE ' . $sumWhere . ')';
+            }
+        }
+
         $listSql = "SELECT * FROM (
             SELECT
                 i." . $this->qi('idx') . " AS idx,
@@ -176,8 +220,9 @@ final class MaterialService
                 {$parentExpr} AS parent_idx,
                 {$tabNameExpr} AS tab_name,
                 {$categoryNameExpr} AS category_name,
-                " . ($this->tableExists('Tb_ItemComponent') ? "(SELECT COUNT(*) FROM Tb_ItemComponent ic WHERE ic.[parent_item_idx]=i.[idx] AND ISNULL(ic.[is_deleted],0)=0)" : "0") . " AS component_count,
-                " . ($this->tableExists('Tb_ItemComponent') ? "(SELECT COUNT(*) FROM Tb_ItemComponent ic WHERE ic.[parent_item_idx]=i.[idx] AND ISNULL(ic.[is_deleted],0)=0)" : "0") . " AS child_count,
+                {$componentCountExpr} AS component_count,
+                {$componentCountExpr} AS child_count,
+                {$childTotalPriceExpr} AS child_total_price,
                 ROW_NUMBER() OVER (ORDER BY " . implode(', ', $orderParts) . ") AS rn
             FROM Tb_Item i
             {$joinTab}
@@ -1562,14 +1607,18 @@ final class MaterialService
             }
         }
 
-        if ($tabIdx > 0 && $this->columnExists('Tb_Item', 'tab_idx')) {
+        $allCatIds = [];
+        if ($categoryIdx > 0 && $this->columnExists('Tb_Item', 'category_idx')) {
+            $allCatIds = $this->categorySubtreeIds($categoryIdx);
+            if ($allCatIds === []) {
+                $allCatIds = [$categoryIdx];
+            }
+            $catPh = implode(',', array_fill(0, count($allCatIds), '?'));
+            $where[] = 'ISNULL(i.' . $this->qi('category_idx') . ', 0) IN (' . $catPh . ')';
+            $params = array_merge($params, $allCatIds);
+        } elseif ($tabIdx > 0 && $this->columnExists('Tb_Item', 'tab_idx')) {
             $where[] = 'ISNULL(i.' . $this->qi('tab_idx') . ', 0) = ?';
             $params[] = $tabIdx;
-        }
-
-        if ($categoryIdx > 0 && $this->columnExists('Tb_Item', 'category_idx')) {
-            $where[] = 'ISNULL(i.' . $this->qi('category_idx') . ', 0) = ?';
-            $params[] = $categoryIdx;
         }
 
         if ($this->columnExists('Tb_Item', 'is_deleted')) {
@@ -1601,6 +1650,37 @@ final class MaterialService
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (is_array($rows) && $rows !== [] && $this->tableExists('Tb_ItemCategory') && $this->columnExists('Tb_ItemCategory', 'idx') && $this->columnExists('Tb_ItemCategory', 'name')) {
+            $catSql = 'SELECT idx, ' . ($this->columnExists('Tb_ItemCategory', 'parent_idx') ? 'ISNULL(parent_idx, 0)' : '0') . ' AS parent_idx, name FROM Tb_ItemCategory';
+            if ($this->columnExists('Tb_ItemCategory', 'is_deleted')) {
+                $catSql .= ' WHERE ISNULL(is_deleted, 0) = 0';
+            }
+            $catStmt = $this->db->prepare($catSql);
+            $catStmt->execute();
+            $catRows = $catStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+            $catMap = [];
+            foreach ($catRows as $catRow) {
+                $catIdx = (int)($catRow['idx'] ?? 0);
+                if ($catIdx <= 0) {
+                    continue;
+                }
+                $catMap[$catIdx] = [
+                    'name' => (string)($catRow['name'] ?? ''),
+                    'parent_idx' => (int)($catRow['parent_idx'] ?? 0),
+                ];
+            }
+            foreach ($rows as &$row) {
+                $path = [];
+                $cid = (int)($row['category_idx'] ?? 0);
+                $depthGuard = 0;
+                while ($cid > 0 && isset($catMap[$cid]) && $depthGuard++ < 20) {
+                    array_unshift($path, $catMap[$cid]['name']);
+                    $cid = (int)$catMap[$cid]['parent_idx'];
+                }
+                $row['cat_path'] = implode(' > ', $path);
+            }
+            unset($row);
+        }
 
         return is_array($rows) ? $rows : [];
     }
@@ -1637,6 +1717,8 @@ final class MaterialService
                     " . $this->itemStringExpr('name', 255, '') . " AS child_item_name,
                     " . $this->itemStringExpr('standard', 255, '') . " AS child_standard,
                     " . $this->itemStringExpr('unit', 60, '') . " AS child_unit,
+                    " . $this->itemFloatExpr('sale_price', 0) . " AS child_sale_price,
+                    " . $this->itemFloatExpr('cost', 0) . " AS child_cost,
                     " . $this->itemStringExpr('inventory_management', 10, '무') . " AS child_inventory_management,
                     " . $this->itemStringExpr('material_pattern', 20, '') . " AS child_material_pattern,
                     " . $this->itemStringExpr('follow_mode', 5, '') . " AS child_follow_mode
@@ -2012,7 +2094,7 @@ final class MaterialService
             $row[$key] = (int)$row[$key];
         }
 
-        foreach (['cost', 'sale_price', 'safety_count', 'base_count', 'qty'] as $key) {
+        foreach (['cost', 'sale_price', 'safety_count', 'base_count', 'qty', 'child_total_price'] as $key) {
             if (!array_key_exists($key, $row)) {
                 continue;
             }
