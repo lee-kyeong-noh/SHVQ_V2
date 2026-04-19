@@ -920,8 +920,8 @@ window.svDelete = function(){
 };
 
 /* ── 견적 등록/상세/삭제/복사/승인/재계산/PDF ── */
-window.svAddEst = function(){ SHV.modal.open('views/saas/fms/est_add.php?site_idx='+_siteIdx+'&member_idx='+(_data.member_idx||0),'견적 등록','xl'); SHV.modal.onClose(function(){ _loaded.svTabEst=false; loadEstimates(); }); };
-window.svViewEst = function(idx){ SHV.modal.open('views/saas/fms/est_add.php?todo=modify&idx='+idx+'&site_idx='+_siteIdx+'&member_idx='+(_data.member_idx||0),'견적 상세','xl'); SHV.modal.onClose(function(){ _loaded.svTabEst=false; loadEstimates(); }); };
+window.svAddEst = function(){ SHV.modal.open('views/saas/fms/est_add.php?site_idx='+_siteIdx+'&member_idx='+(_data.member_idx||0),'견적 등록','lg'); SHV.modal.onClose(function(){ _loaded.svTabEst=false; loadEstimates(); }); };
+window.svViewEst = function(idx){ SHV.modal.open('views/saas/fms/est_add.php?todo=modify&idx='+idx+'&site_idx='+_siteIdx+'&member_idx='+(_data.member_idx||0),'견적 상세','lg'); SHV.modal.onClose(function(){ _loaded.svTabEst=false; loadEstimates(); }); };
 window.svDelEst = function(idx){ svConfirmDel('견적 삭제','delete_estimate',idx,'svTabEst',function(){ loadEstimates(); loadDetail(); }); };
 window.svCopyEst = function(idx){
     SHV.confirm({title:'견적 복사',message:'이 견적을 복사하시겠습니까?',confirmText:'복사',
