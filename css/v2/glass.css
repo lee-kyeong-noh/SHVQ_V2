@@ -135,3 +135,229 @@
         inset 0 1px 0 rgba(255,255,255,0.30),
         inset 0 -1px 0 rgba(255,255,255,0.05);
 }
+
+/* ══════════════════════════════════════════════════
+   REFINED DARK LIQUID GLASS OVERRIDE (Claude Design)
+   하루 8시간 사용 최적화 — 낮은 채도, 명확한 위계
+   추가일: 2026-04-19
+   ══════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   REFINED DARK LIQUID GLASS OVERRIDE
+   하루 8시간 사용 최적화: 낮은 채도, 명확한 위계
+═══════════════════════════════════════════ */
+
+/* ── Body: deeper midnight ── */
+[data-theme="dark"] body {
+  background:
+    radial-gradient(ellipse 90% 60% at 15% 0%, rgba(30,60,160,.28) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 50% at 90% 100%, rgba(10,100,180,.18) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 40%, rgba(20,30,80,.25) 0%, transparent 60%),
+    #080e1c;
+}
+
+/* ── Topbar: ultra-thin glass ── */
+[data-theme="dark"] #topbar {
+  background: rgba(8,14,28,.75) !important;
+  border: 1px solid rgba(255,255,255,.07) !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.04),
+    0 4px 24px rgba(0,0,0,.5) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+/* ── Sidebar: premium navy glass ── */
+[data-theme="dark"] #sidebar {
+  background: linear-gradient(180deg,
+    rgba(15,28,80,.92) 0%,
+    rgba(10,18,60,.95) 50%,
+    rgba(8,14,48,.97) 100%) !important;
+  border-right: 1px solid rgba(79,142,247,.12) !important;
+  box-shadow: inset -1px 0 0 rgba(255,255,255,.04) !important;
+}
+
+/* ── Cards: premium glass ── */
+[data-theme="dark"] .card {
+  background: linear-gradient(
+    145deg,
+    rgba(255,255,255,.055) 0%,
+    rgba(255,255,255,.025) 100%
+  ) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.08),
+    inset 0 -1px 0 rgba(0,0,0,.15),
+    0 8px 32px rgba(0,0,0,.35),
+    0 1px 0 rgba(0,0,0,.2) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+/* ── DV Header: slightly elevated ── */
+[data-theme="dark"] .dv-header {
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,.06) 0%,
+    rgba(255,255,255,.03) 100%
+  ) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+}
+
+/* ── dv-title: softer white ── */
+[data-theme="dark"] .dv-title {
+  color: rgba(235,242,255,.92) !important;
+  letter-spacing: -.3px;
+  font-weight: 800 !important;
+}
+
+/* ── Pills: refined ── */
+[data-theme="dark"] .dv-pill {
+  background: rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  color: rgba(255,255,255,.45) !important;
+}
+
+/* ── KPI cards: colored accent top bars ── */
+[data-theme="dark"] .dv-summary { gap: 10px; grid-template-columns: repeat(4, 1fr) !important; }
+.dv-summary { grid-template-columns: repeat(4, 1fr) !important; }
+
+[data-theme="dark"] .dv-sum-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.025)) !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 24px rgba(0,0,0,.3) !important;
+  transition: transform .15s, box-shadow .15s;
+}
+[data-theme="dark"] .dv-sum-card:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 14px 36px rgba(0,0,0,.45) !important;
+}
+[data-theme="dark"] .dv-sum-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  border-radius: 12px 12px 0 0;
+}
+[data-theme="dark"] .dv-sum-card:nth-child(1)::before { background: linear-gradient(90deg, #4f8ef7, #60b8ff) }
+[data-theme="dark"] .dv-sum-card:nth-child(2)::before { background: linear-gradient(90deg, #a78bfa, #c4b5fd) }
+[data-theme="dark"] .dv-sum-card:nth-child(3)::before { background: linear-gradient(90deg, #00c878, #34d399) }
+[data-theme="dark"] .dv-sum-card:nth-child(4)::before { background: linear-gradient(90deg, #f59e0b, #fbbf24) }
+
+[data-theme="dark"] .dv-sum-label { color: rgba(255,255,255,.4) !important; font-size: 11px; letter-spacing: .04em }
+[data-theme="dark"] .dv-sum-value { color: rgba(235,242,255,.92) !important; font-size: 28px; font-weight: 800 }
+[data-theme="dark"] .dv-sum-sub   { color: rgba(255,255,255,.3) !important; font-size: 11px }
+
+/* ── Tab bar: subtle glass ── */
+[data-theme="dark"] .sv-tab-bar-scroll { padding: 4px 6px 0 }
+[data-theme="dark"] .tab-item {
+  color: rgba(255,255,255,.38) !important;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 8px 8px 0 0;
+  transition: color .12s, background .12s;
+}
+[data-theme="dark"] .tab-item:hover {
+  color: rgba(255,255,255,.72) !important;
+  background: rgba(255,255,255,.04);
+}
+[data-theme="dark"] .tab-active {
+  color: rgba(120,175,255,.95) !important;
+  font-weight: 600 !important;
+  background: rgba(79,142,247,.10) !important;
+  border-bottom-color: #4f8ef7 !important;
+}
+[data-theme="dark"] .tab-badge {
+  background: rgba(79,142,247,.2) !important;
+  color: #90c2ff !important;
+  font-size: 10px;
+}
+
+/* ── Info sections ── */
+[data-theme="dark"] .dv-info-section {
+  border-bottom-color: rgba(255,255,255,.06) !important;
+}
+[data-theme="dark"] .dv-section-title {
+  color: rgba(255,255,255,.55) !important;
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+[data-theme="dark"] .dv-section-title::before {
+  background: linear-gradient(180deg, #4f8ef7, #2aafd4) !important;
+}
+[data-theme="dark"] .dv-row-label { color: rgba(255,255,255,.32) !important; font-size: 11px }
+[data-theme="dark"] .dv-row-value { color: rgba(235,242,255,.85) !important; font-size: 13px }
+[data-theme="dark"] .dv-row-value.dv-primary {
+  color: rgba(235,242,255,.95) !important;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ── Address ── */
+[data-theme="dark"] .dv-zip {
+  background: rgba(79,142,247,.15) !important;
+  color: #90c2ff !important;
+}
+[data-theme="dark"] .dv-addr-text { color: rgba(235,242,255,.75) !important }
+
+/* ── Buttons refined ── */
+[data-theme="dark"] .btn-glass-primary {
+  background: linear-gradient(135deg, rgba(59,108,247,.8), rgba(42,175,212,.7)) !important;
+  border: 1px solid rgba(79,142,247,.35) !important;
+  box-shadow: 0 2px 12px rgba(59,108,247,.25), inset 0 1px 0 rgba(255,255,255,.12) !important;
+  color: #fff !important;
+}
+[data-theme="dark"] .btn-glass-primary:hover {
+  box-shadow: 0 4px 20px rgba(59,108,247,.45), inset 0 1px 0 rgba(255,255,255,.18) !important;
+}
+[data-theme="dark"] .btn-outline {
+  background: rgba(255,255,255,.04) !important;
+  border-color: rgba(255,255,255,.10) !important;
+  color: rgba(255,255,255,.55) !important;
+}
+[data-theme="dark"] .btn-outline:hover {
+  background: rgba(255,255,255,.08) !important;
+  color: rgba(255,255,255,.85) !important;
+}
+
+/* ── Side items ── */
+[data-theme="dark"] .side-item { color: rgba(255,255,255,.42) !important; font-size: 12px }
+[data-theme="dark"] .side-item:hover { color: rgba(255,255,255,.80) !important; background: rgba(255,255,255,.05) !important }
+[data-theme="dark"] .side-item.active {
+  color: #90c2ff !important;
+  background: rgba(79,142,247,.15) !important;
+  border: 1px solid rgba(79,142,247,.22) !important;
+}
+[data-theme="dark"] .side-title {
+  color: rgba(79,142,247,.6) !important;
+  font-size: 9.5px;
+  letter-spacing: .08em;
+}
+
+/* ── Tables ── */
+[data-theme="dark"] .tbl thead th {
+  color: rgba(255,255,255,.3) !important;
+  border-bottom-color: rgba(255,255,255,.07) !important;
+  font-size: 10px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  background: rgba(255,255,255,.02);
+}
+[data-theme="dark"] .tbl tbody tr { border-bottom-color: rgba(255,255,255,.04) !important }
+[data-theme="dark"] .tbl tbody tr:hover { background: rgba(255,255,255,.03) !important }
+[data-theme="dark"] .tbl tbody td { color: rgba(235,242,255,.75) !important }
+
+/* ── Empty state ── */
+[data-theme="dark"] .empty-state { color: rgba(255,255,255,.2) !important }
+[data-theme="dark"] .empty-icon { font-size: 28px; opacity: .2 }
+[data-theme="dark"] .empty-message { font-size: 13px }
+
+/* ── Scrollbar ── */
+[data-theme="dark"] #content::-webkit-scrollbar { width: 4px }
+[data-theme="dark"] #content::-webkit-scrollbar-thumb { background: rgba(79,142,247,.2); border-radius: 4px }
+[data-theme="dark"] #sidebar::-webkit-scrollbar { width: 3px }
+[data-theme="dark"] #sidebar::-webkit-scrollbar-thumb { background: rgba(79,142,247,.15) }
+
+/* ── Copyright ── */
+[data-theme="dark"] #shv-copyright { background: rgba(8,14,28,.9) !important; color: rgba(255,255,255,.15) !important }

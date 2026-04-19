@@ -903,6 +903,52 @@ curl -s --ftp-pasv -u "vision_ftp:dlrudfh@019" \
                     <tr><td>6</td><td>HDEL(JQPR)</td><td style="background:#0000FF;color:#fff">#0000FF</td></tr>
                 </table>
             </div>
+            <div class="manual-card mt-3">
+                <div class="manual-sub-title">V2 견적 모달 V1 통합 이식 (2026-04-19)</div>
+                <p class="text-sm">V1 add_estimate.php (1460줄) → V2 est_add.php + est_pick.php 리팩터링 이식 완료.</p>
+                <table class="manual-tbl mt-2">
+                    <tr><th>영역</th><th>구현</th><th>위치</th></tr>
+                    <tr><td>견적 모달 헤더</td><td>견적항목 카운트 배지 + 사업장명 + PJT 태그</td><td>est_add.php</td></tr>
+                    <tr><td>합계(권고액)</td><td>22px 큰 폰트 강조</td><td>est_add.php</td></tr>
+                    <tr><td>카트 본체+구성 합산</td><td>구성품은 부모 행 안에 "구성: A, B" 표시</td><td>est_add.php renderCart</td></tr>
+                    <tr><td>autoEstName</td><td>첫 품목명 + " 외 N건" 자동 생성 (사용자 편집 후 중단)</td><td>est_add.php</td></tr>
+                    <tr><td>구버전 매핑 영역</td><td>완료/대기/실패 배지 + summary 카운트 (수정 모드)</td><td>est_add.php</td></tr>
+                    <tr><td>품목 검색 모달</td><td>frequent_items 우선 → list 폴백 / 카드 카테고리 + 자재번호 표시</td><td>est_pick.php</td></tr>
+                    <tr><td>상세 모드 토글</td><td>OFF=카드 클릭 즉시 카트 추가 / ON=별도 overlay 팝업</td><td>est_pick.php</td></tr>
+                    <tr><td>구성품 자동 로드</td><td>component_list todo (Tb_ItemComponent 기반, parent_idx 컬럼 없음)</td><td>est_pick.php</td></tr>
+                </table>
+            </div>
+            <div class="manual-card mt-3">
+                <div class="manual-sub-title">백엔드 API 신규 (2026-04-19)</div>
+                <table class="manual-tbl">
+                    <tr><th>todo</th><th>endpoint</th><th>용도</th></tr>
+                    <tr><td>est_tab_list</td><td>Site.php</td><td>사이트별 PJT 탭 목록 (V1 use_estimate_idxs fallback)</td></tr>
+                    <tr><td>est_legacy_mapping_status</td><td>Site.php</td><td>견적 품목별 V1→V2 매핑 상태 (완료/대기/실패)</td></tr>
+                    <tr><td>est_category_badges</td><td>Site.php</td><td>카테고리 옵션 배지 + region 매칭 (option_1~10 fallback)</td></tr>
+                    <tr><td>item_property_master</td><td>Material.php</td><td>PJT 속성 마스터 (Tb_UserSettings ITEM_PROPERTY/ITEM_PROPERTY_COLORS)</td></tr>
+                    <tr><td>list (cat_idx 필터 + include_subtree)</td><td>Material.php</td><td>cat_idx 필터 버그 수정 + include_subtree=1 옵션 (하위 카테고리 포함)</td></tr>
+                    <tr><td>insert_est / update_est</td><td>Site.php</td><td>cost_total / increase_amount 저장 추가</td></tr>
+                </table>
+            </div>
+            <div class="manual-card mt-3">
+                <div class="manual-sub-title">DB 스키마 변경</div>
+                <table class="manual-tbl">
+                    <tr><th>테이블</th><th>컬럼</th><th>마이그레이션</th></tr>
+                    <tr><td>Tb_SiteEstimate</td><td>cost_total int NULL (신규 추가)</td><td>20260419_wave13_site_estimate_cost_total.sql</td></tr>
+                    <tr><td>Tb_Item</td><td>attribute (V1에는 있으나 V2 누락 — 별도 마이그레이션 대기)</td><td>예정</td></tr>
+                </table>
+            </div>
+            <div class="manual-card mt-3">
+                <div class="manual-sub-title">디자인 시스템 — REFINED DARK LIQUID GLASS</div>
+                <p class="text-sm">Claude Design 리디자인 — 다크 테마 글래스 오버라이드 (전 페이지 자동 적용).</p>
+                <p class="text-sm">위치: <code>css/v2/glass.css</code> 끝 (137 → 363줄, +222줄)</p>
+                <ul class="text-sm mt-2" style="padding-left:20px;">
+                    <li>Body 배경: 깊은 미드나이트 + 3중 라디얼 그라디언트</li>
+                    <li>Topbar / Sidebar: 프리미엄 네이비 글래스</li>
+                    <li>KPI 카드: 색상 액센트 상단 바 (4색) + hover 떠오름</li>
+                    <li>채도 낮춤 (8시간 작업 피로도 ↓)</li>
+                </ul>
+            </div>
         </section>
 
         <!-- ── V1 Config 전수 ── -->

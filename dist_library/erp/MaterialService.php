@@ -30,7 +30,8 @@ final class MaterialService
 
         $search = trim((string)($query['search'] ?? ''));
         $tabIdx = (int)($query['tab_idx'] ?? 0);
-        $categoryIdx = (int)($query['category_idx'] ?? 0);
+        $categoryIdx = (int)($query['category_idx'] ?? $query['cat_idx'] ?? 0);
+        $includeSubtree = ((int)($query['include_subtree'] ?? 0)) === 1;
         $hasParentFilter = array_key_exists('parent_idx', $query) || array_key_exists('parent_item_idx', $query);
         $parentIdx = (int)($query['parent_idx'] ?? $query['parent_item_idx'] ?? 0);
         $parentCol = $this->columnExists('Tb_Item', 'parent_idx')
@@ -72,8 +73,20 @@ final class MaterialService
         }
 
         if ($categoryIdx > 0 && $this->columnExists('Tb_Item', 'category_idx')) {
-            $where[] = 'ISNULL(i.' . $this->qi('category_idx') . ', 0) = ?';
-            $params[] = $categoryIdx;
+            if ($includeSubtree) {
+                $categoryIds = $this->categorySubtreeIds($categoryIdx);
+                if ($categoryIds === []) {
+                    $categoryIds = [$categoryIdx];
+                }
+                $ph = implode(', ', array_fill(0, count($categoryIds), '?'));
+                $where[] = 'ISNULL(i.' . $this->qi('category_idx') . ', 0) IN (' . $ph . ')';
+                foreach ($categoryIds as $catId) {
+                    $params[] = $catId;
+                }
+            } else {
+                $where[] = 'ISNULL(i.' . $this->qi('category_idx') . ', 0) = ?';
+                $params[] = $categoryIdx;
+            }
         }
         if ($hasParentFilter && $parentCol !== null) {
             $where[] = 'ISNULL(i.' . $this->qi($parentCol) . ', 0) = ?';
@@ -151,6 +164,9 @@ final class MaterialService
                 " . $this->itemFloatExpr('safety_count', 0) . " AS safety_count,
                 " . $this->itemFloatExpr('base_count', 0) . " AS base_count,
                 " . $this->itemFloatExpr('sale_price', 0) . " AS sale_price,
+                " . $this->itemImageAliasExpr('banner_img', 'upload_files_banner', 500) . " AS banner_img,
+                " . $this->itemStringExpr('upload_files_banner', 500, '') . " AS upload_files_banner,
+                " . $this->itemStringExpr('upload_files_detail', 500, '') . " AS upload_files_detail,
                 " . $this->itemFloatExpr('qty', 0) . " AS qty,
                 " . $this->itemIntExpr('origin_idx', 0) . " AS origin_idx,
                 " . $this->itemIntExpr('legacy_idx', 0) . " AS legacy_idx,
@@ -173,9 +189,10 @@ final class MaterialService
         $stmt = $this->db->prepare($listSql);
         $stmt->execute(array_merge($params, [$rowFrom, $rowTo]));
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $rows = is_array($rows) ? $this->normalizeListRows($rows) : [];
 
         return [
-            'data' => is_array($rows) ? $rows : [],
+            'data' => $rows,
             'total' => $total,
             'page' => $page,
             'pages' => max(1, (int)ceil($total / $limit)),
@@ -1304,6 +1321,13 @@ final class MaterialService
                         " . $this->itemStringExpr('name', 255, '') . " AS name,
                         " . $this->itemStringExpr('standard', 255, '') . " AS standard,
                         " . $this->itemStringExpr('unit', 60, '') . " AS unit,
+                        " . $this->itemIntExpr('category_idx', 0) . " AS category_idx,
+                        " . $this->itemStringExpr('attribute', 60, '') . " AS attribute,
+                        " . $this->itemFloatExpr('cost', 0) . " AS cost,
+                        " . $this->itemFloatExpr('sale_price', 0) . " AS sale_price,
+                        " . $this->itemImageAliasExpr('banner_img', 'upload_files_banner', 500) . " AS banner_img,
+                        " . $this->itemStringExpr('upload_files_banner', 500, '') . " AS upload_files_banner,
+                        " . $this->itemStringExpr('upload_files_detail', 500, '') . " AS upload_files_detail,
                         ISNULL(f.usage_count, 0) AS usage_count,
                         CONVERT(NVARCHAR(19), f.last_used_at, 120) AS last_used_at
                     FROM freq f
@@ -1312,7 +1336,7 @@ final class MaterialService
             $stmt = $this->db->prepare($sql);
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return is_array($rows) ? $rows : [];
+            return is_array($rows) ? $this->normalizeListRows($rows) : [];
         }
 
         $itemTimeCol = $this->firstExistingColumn('Tb_Item', ['updated_at', 'created_at', 'regdate']);
@@ -1329,6 +1353,13 @@ final class MaterialService
                     " . $this->itemStringExpr('name', 255, '') . " AS name,
                     " . $this->itemStringExpr('standard', 255, '') . " AS standard,
                     " . $this->itemStringExpr('unit', 60, '') . " AS unit,
+                    " . $this->itemIntExpr('category_idx', 0) . " AS category_idx,
+                    " . $this->itemStringExpr('attribute', 60, '') . " AS attribute,
+                    " . $this->itemFloatExpr('cost', 0) . " AS cost,
+                    " . $this->itemFloatExpr('sale_price', 0) . " AS sale_price,
+                    " . $this->itemImageAliasExpr('banner_img', 'upload_files_banner', 500) . " AS banner_img,
+                    " . $this->itemStringExpr('upload_files_banner', 500, '') . " AS upload_files_banner,
+                    " . $this->itemStringExpr('upload_files_detail', 500, '') . " AS upload_files_detail,
                     0 AS usage_count,
                     {$itemTimeExpr} AS last_used_at
                 FROM Tb_Item i
@@ -1337,7 +1368,7 @@ final class MaterialService
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return is_array($rows) ? $rows : [];
+        return is_array($rows) ? $this->normalizeListRows($rows) : [];
     }
 
     public function historyList(int $itemIdx, int $page = 1, int $limit = 20): array
@@ -1840,6 +1871,7 @@ final class MaterialService
             'safety' => 'float',
             'qty' => 'float',
             'contents' => 'string',
+            'reg_date' => 'date',
             'is_split' => 'string',
             'follow_mode' => 'string',
             'upload_files_banner' => 'string',
@@ -1881,6 +1913,24 @@ final class MaterialService
                 return 1;
             }
             return 0;
+        }
+
+        if ($type === 'date') {
+            $text = trim((string)$value);
+            if ($text === '') {
+                return null;
+            }
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $text) !== 1) {
+                throw new InvalidArgumentException('date must be YYYY-MM-DD');
+            }
+            $parts = explode('-', $text);
+            $year = (int)($parts[0] ?? 0);
+            $month = (int)($parts[1] ?? 0);
+            $day = (int)($parts[2] ?? 0);
+            if (!checkdate($month, $day, $year)) {
+                throw new InvalidArgumentException('date is invalid: ' . $text);
+            }
+            return $text;
         }
 
         return trim((string)$value);
@@ -1939,6 +1989,131 @@ final class MaterialService
         }
 
         return 'COALESCE(' . implode(', ', $parts) . ", CAST(NULL AS NVARCHAR({$len})))";
+    }
+
+    private function normalizeListRows(array $rows): array
+    {
+        $result = [];
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $result[] = $this->normalizeListRow($row);
+        }
+        return $result;
+    }
+
+    private function normalizeListRow(array $row): array
+    {
+        foreach (['idx', 'tab_idx', 'category_idx', 'origin_idx', 'legacy_idx', 'is_legacy_copy', 'legacy_copied', 'is_migrated', 'component_count', 'child_count', 'usage_count'] as $key) {
+            if (!array_key_exists($key, $row)) {
+                continue;
+            }
+            $row[$key] = (int)$row[$key];
+        }
+
+        foreach (['cost', 'sale_price', 'safety_count', 'base_count', 'qty'] as $key) {
+            if (!array_key_exists($key, $row)) {
+                continue;
+            }
+            $raw = $row[$key];
+            if ($raw === null || $raw === '') {
+                $row[$key] = 0.0;
+                continue;
+            }
+            $row[$key] = is_numeric((string)$raw) ? (float)$raw : 0.0;
+        }
+
+        if (array_key_exists('attribute', $row)) {
+            $row['attribute'] = trim((string)$row['attribute']);
+        }
+
+        $banner = trim((string)($row['banner_img'] ?? ''));
+        $uploadBanner = trim((string)($row['upload_files_banner'] ?? ''));
+        $uploadDetail = trim((string)($row['upload_files_detail'] ?? ''));
+
+        if ($banner === '') {
+            $banner = $uploadBanner;
+        }
+        if ($banner === '') {
+            $banner = $uploadDetail;
+        }
+
+        $row['banner_img'] = $banner;
+        $row['upload_files_banner'] = $uploadBanner;
+        $row['upload_files_detail'] = $uploadDetail;
+        $row['image_url'] = $banner;
+
+        return $row;
+    }
+
+    private function categorySubtreeIds(int $rootIdx): array
+    {
+        if ($rootIdx <= 0) {
+            return [];
+        }
+        if (
+            !$this->tableExists('Tb_ItemCategory')
+            || !$this->columnExists('Tb_ItemCategory', 'idx')
+            || !$this->columnExists('Tb_ItemCategory', 'parent_idx')
+        ) {
+            return [$rootIdx];
+        }
+
+        $where = ['1=1'];
+        if ($this->columnExists('Tb_ItemCategory', 'is_deleted')) {
+            $where[] = 'ISNULL(is_deleted, 0) = 0';
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT idx, ISNULL(parent_idx, 0) AS parent_idx FROM Tb_ItemCategory WHERE ' . implode(' AND ', $where)
+        );
+        $stmt->execute();
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!is_array($rows) || $rows === []) {
+            return [$rootIdx];
+        }
+
+        $childrenByParent = [];
+        foreach ($rows as $row) {
+            $idx = (int)($row['idx'] ?? 0);
+            $parentIdx = (int)($row['parent_idx'] ?? 0);
+            if ($idx <= 0) {
+                continue;
+            }
+            if (!array_key_exists($parentIdx, $childrenByParent)) {
+                $childrenByParent[$parentIdx] = [];
+            }
+            $childrenByParent[$parentIdx][] = $idx;
+        }
+
+        $queue = [$rootIdx];
+        $visited = [];
+        $result = [];
+
+        while ($queue !== []) {
+            $current = array_shift($queue);
+            if (!is_int($current) || $current <= 0 || array_key_exists($current, $visited)) {
+                continue;
+            }
+            $visited[$current] = true;
+            $result[] = $current;
+
+            if (!array_key_exists($current, $childrenByParent)) {
+                continue;
+            }
+            foreach ($childrenByParent[$current] as $childIdx) {
+                if (!array_key_exists($childIdx, $visited)) {
+                    $queue[] = $childIdx;
+                }
+            }
+        }
+
+        if ($result === []) {
+            $result[] = $rootIdx;
+        }
+
+        return array_values(array_unique(array_map('intval', $result)));
     }
 
     private function joinedNameExpr(string $table, string $alias, int $len): string

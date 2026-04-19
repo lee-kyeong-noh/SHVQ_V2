@@ -15,7 +15,8 @@ declare(strict_types=1);
  *   todo=toggle_contact_hidden
  *   todo=site_settings, save_site_settings, excel_template, excel_upload
  * Estimate:
- *   todo=est_list, est_detail, est_file_list, insert_est, update_est, delete_estimate,
+ *   todo=est_list, est_detail, est_file_list, est_legacy_mapping_status,
+ *   est_tab_list, est_category_badges, insert_est, update_est, delete_estimate,
  *   copy_est, recalc_est, upsert_est_items, update_est_item, delete_est_item,
  *   approve_est, est_pdf_data
  */
@@ -418,6 +419,51 @@ try {
             return 0;
         }
         return max(0, (int)$digits);
+    };
+
+    $parseCsvIdxList = static function (mixed $raw): array {
+        if (is_array($raw)) {
+            $parts = $raw;
+        } else {
+            $text = trim((string)$raw);
+            if ($text === '') {
+                return [];
+            }
+            $parts = preg_split('/[,\s]+/', $text) ?: [];
+        }
+
+        $result = [];
+        foreach ($parts as $part) {
+            $num = (int)trim((string)$part);
+            if ($num > 0) {
+                $result[] = $num;
+            }
+        }
+        $result = array_values(array_unique($result));
+        sort($result, SORT_NUMERIC);
+        return $result;
+    };
+
+    $legacyTableExists = static function (PDO $pdo, string $dbName, string $tableName): bool {
+        $safeDb = preg_replace('/[^A-Za-z0-9_]/', '', $dbName) ?? '';
+        if ($safeDb === '' || $tableName === '') {
+            return false;
+        }
+        $sql = "SELECT COUNT(*) FROM [{$safeDb}].INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE' AND TABLE_NAME=?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tableName]);
+        return ((int)$stmt->fetchColumn()) > 0;
+    };
+
+    $legacyColumnExists = static function (PDO $pdo, string $dbName, string $tableName, string $columnName): bool {
+        $safeDb = preg_replace('/[^A-Za-z0-9_]/', '', $dbName) ?? '';
+        if ($safeDb === '' || $tableName === '' || $columnName === '') {
+            return false;
+        }
+        $sql = "SELECT COUNT(*) FROM [{$safeDb}].INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=? AND COLUMN_NAME=?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$tableName, $columnName]);
+        return ((int)$stmt->fetchColumn()) > 0;
     };
 
     $normalizePublicUrl = static function (string $raw): string {
@@ -6270,6 +6316,765 @@ try {
         exit;
     }
 
+    if (in_array($todo, ['est_legacy_mapping_status', 'estimate_legacy_mapping_status', 'legacy_mapping_status'], true)) {
+        $estimateIdx = (int)($_GET['estimate_idx'] ?? $_GET['est_idx'] ?? $_GET['idx'] ?? 0);
+        if ($estimateIdx <= 0) {
+            ApiResponse::error('INVALID_PARAM', 'estimate_idx is required', 422);
+            exit;
+        }
+
+        $estimate = $loadEstimate($db, $tableExists, $columnExists, $firstExistingColumn, $estimateIdx);
+        if ($estimate === null) {
+            ApiResponse::error('NOT_FOUND', '견적을 찾을 수 없습니다', 404);
+            exit;
+        }
+
+        $sourceDb = 'CSM_C004732';
+        $legacySaleTableExists = false;
+        $legacyProductTableExists = false;
+        try {
+            $legacySaleTableExists = $legacyTableExists($db, $sourceDb, 'Tb_Product_Estimates');
+            $legacyProductTableExists = $legacyTableExists($db, $sourceDb, 'Tb_Products');
+        } catch (Throwable) {
+            $legacySaleTableExists = false;
+            $legacyProductTableExists = false;
+        }
+
+        $saleIdx = (int)($estimate['sale_idx'] ?? 0);
+        $legacySale = null;
+        $legacyProduct = null;
+        $mappedFromSale = null;
+
+        if ($legacySaleTableExists && $saleIdx > 0) {
+            try {
+                $sql = "SELECT TOP 1\n"
+                    . "  idx,\n"
+                    . "  ISNULL(TRY_CONVERT(INT, product_idx), 0) AS product_idx,\n"
+                    . "  ISNULL(TRY_CONVERT(INT, member_idx), 0) AS member_idx,\n"
+                    . "  ISNULL(TRY_CONVERT(INT, employee_idx), 0) AS employee_idx,\n"
+                    . "  ISNULL(TRY_CONVERT(INT, [count]), 0) AS qty,\n"
+                    . "  ISNULL(TRY_CONVERT(DECIMAL(19,2), sale_unit_price), 0) AS sale_unit_price,\n"
+                    . "  ISNULL(TRY_CONVERT(DECIMAL(19,2), supply_price), 0) AS supply_price,\n"
+                    . "  ISNULL(TRY_CONVERT(DECIMAL(19,2), tax_price), 0) AS tax_price,\n"
+                    . "  sale_date,\n"
+                    . "  insert_date\n"
+                    . "FROM [{$sourceDb}].dbo.[Tb_Product_Estimates]\n"
+                    . 'WHERE idx = ?';
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$saleIdx]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (is_array($row)) {
+                    $legacySale = $row;
+                }
+            } catch (Throwable) {
+                $legacySale = null;
+            }
+        }
+
+        $legacyProductIdx = (int)($legacySale['product_idx'] ?? 0);
+        if ($legacyProductTableExists && $legacyProductIdx > 0) {
+            try {
+                $legacyNameCol = null;
+                foreach (['name', 'item_name'] as $col) {
+                    if ($legacyColumnExists($db, $sourceDb, 'Tb_Products', $col)) {
+                        $legacyNameCol = $col;
+                        break;
+                    }
+                }
+                $legacyStdCol = null;
+                foreach (['standard', 'spec'] as $col) {
+                    if ($legacyColumnExists($db, $sourceDb, 'Tb_Products', $col)) {
+                        $legacyStdCol = $col;
+                        break;
+                    }
+                }
+                $legacyUnitCol = null;
+                foreach (['unit'] as $col) {
+                    if ($legacyColumnExists($db, $sourceDb, 'Tb_Products', $col)) {
+                        $legacyUnitCol = $col;
+                        break;
+                    }
+                }
+
+                $nameExpr = $legacyNameCol !== null
+                    ? "ISNULL(CAST(" . $qi($legacyNameCol) . " AS NVARCHAR(255)), '') AS name"
+                    : "CAST('' AS NVARCHAR(255)) AS name";
+                $stdExpr = $legacyStdCol !== null
+                    ? "ISNULL(CAST(" . $qi($legacyStdCol) . " AS NVARCHAR(255)), '') AS standard"
+                    : "CAST('' AS NVARCHAR(255)) AS standard";
+                $unitExpr = $legacyUnitCol !== null
+                    ? "ISNULL(CAST(" . $qi($legacyUnitCol) . " AS NVARCHAR(60)), '') AS unit"
+                    : "CAST('' AS NVARCHAR(60)) AS unit";
+
+                $sql = "SELECT TOP 1 idx, {$nameExpr}, {$stdExpr}, {$unitExpr}\n"
+                    . "FROM [{$sourceDb}].dbo.[Tb_Products]\n"
+                    . 'WHERE idx = ?';
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$legacyProductIdx]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (is_array($row)) {
+                    $legacyProduct = $row;
+                }
+            } catch (Throwable) {
+                $legacyProduct = null;
+            }
+        }
+
+        if ($legacyProductIdx > 0 && $tableExists($db, 'Tb_Item') && $columnExists($db, 'Tb_Item', 'origin_idx')) {
+            try {
+                $where = ['ISNULL(TRY_CONVERT(INT, origin_idx),0)=?'];
+                $params = [$legacyProductIdx];
+                if ($columnExists($db, 'Tb_Item', 'is_deleted')) {
+                    $where[] = 'ISNULL(is_deleted,0)=0';
+                }
+                $stmt = $db->prepare(
+                    'SELECT TOP 1 idx, ISNULL(name,\'\') AS name, '
+                    . ( $columnExists($db, 'Tb_Item', 'standard') ? "ISNULL(standard,'')" : "CAST('' AS NVARCHAR(255))" ) . ' AS standard, '
+                    . ( $columnExists($db, 'Tb_Item', 'unit') ? "ISNULL(unit,'')" : "CAST('' AS NVARCHAR(60))" ) . ' AS unit '
+                    . 'FROM Tb_Item WHERE ' . implode(' AND ', $where) . ' ORDER BY idx DESC'
+                );
+                $stmt->execute($params);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (is_array($row)) {
+                    $mappedFromSale = $row;
+                }
+            } catch (Throwable) {
+                $mappedFromSale = null;
+            }
+        }
+
+        $saleMappingStatus = '대기';
+        $saleMappingReason = 'sale_idx가 비어있습니다';
+        if ($saleIdx > 0) {
+            if (!$legacySaleTableExists) {
+                $saleMappingStatus = '실패';
+                $saleMappingReason = 'V1 Tb_Product_Estimates 테이블을 찾을 수 없습니다';
+            } elseif ($legacySale === null) {
+                $saleMappingStatus = '실패';
+                $saleMappingReason = 'sale_idx에 해당하는 V1 데이터가 없습니다';
+            } elseif ($mappedFromSale !== null) {
+                $saleMappingStatus = '완료';
+                $saleMappingReason = 'Tb_Item.origin_idx 기준 매핑 완료';
+            } else {
+                $saleMappingStatus = '대기';
+                $saleMappingReason = '매핑 대상 Tb_Item(origin_idx) 데이터가 없습니다';
+            }
+        }
+
+        $estimateItems = is_array($estimate['items'] ?? null) ? $estimate['items'] : [];
+        $itemIdxSet = [];
+        $originProductIdxSet = [];
+        foreach ($estimateItems as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $itemIdx = (int)($item['item_idx'] ?? 0);
+            $originProductIdx = (int)($item['origin_product_idx'] ?? 0);
+            if ($itemIdx > 0) {
+                $itemIdxSet[] = $itemIdx;
+            }
+            if ($originProductIdx > 0) {
+                $originProductIdxSet[] = $originProductIdx;
+            }
+        }
+        $itemIdxSet = array_values(array_unique($itemIdxSet));
+        $originProductIdxSet = array_values(array_unique($originProductIdxSet));
+
+        $mappedByItemIdx = [];
+        if ($itemIdxSet !== [] && $tableExists($db, 'Tb_Item')) {
+            $ph = implode(',', array_fill(0, count($itemIdxSet), '?'));
+            $where = ["idx IN ({$ph})"];
+            if ($columnExists($db, 'Tb_Item', 'is_deleted')) {
+                $where[] = 'ISNULL(is_deleted,0)=0';
+            }
+            $stmt = $db->prepare(
+                'SELECT idx, ISNULL(name,\'\') AS name, '
+                . ($columnExists($db, 'Tb_Item', 'standard') ? "ISNULL(standard,'')" : "CAST('' AS NVARCHAR(255))")
+                . ' AS standard, '
+                . ($columnExists($db, 'Tb_Item', 'unit') ? "ISNULL(unit,'')" : "CAST('' AS NVARCHAR(60))")
+                . ' AS unit '
+                . 'FROM Tb_Item WHERE ' . implode(' AND ', $where)
+            );
+            $stmt->execute($itemIdxSet);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (is_array($rows)) {
+                foreach ($rows as $row) {
+                    $idx = (int)($row['idx'] ?? 0);
+                    if ($idx > 0) {
+                        $mappedByItemIdx[$idx] = $row;
+                    }
+                }
+            }
+        }
+
+        $mappedByOriginProductIdx = [];
+        if ($originProductIdxSet !== [] && $tableExists($db, 'Tb_Item') && $columnExists($db, 'Tb_Item', 'origin_idx')) {
+            $ph = implode(',', array_fill(0, count($originProductIdxSet), '?'));
+            $where = ["ISNULL(TRY_CONVERT(INT, origin_idx),0) IN ({$ph})"];
+            if ($columnExists($db, 'Tb_Item', 'is_deleted')) {
+                $where[] = 'ISNULL(is_deleted,0)=0';
+            }
+            $stmt = $db->prepare(
+                'SELECT idx, ISNULL(TRY_CONVERT(INT, origin_idx),0) AS origin_idx, ISNULL(name,\'\') AS name, '
+                . ($columnExists($db, 'Tb_Item', 'standard') ? "ISNULL(standard,'')" : "CAST('' AS NVARCHAR(255))")
+                . ' AS standard, '
+                . ($columnExists($db, 'Tb_Item', 'unit') ? "ISNULL(unit,'')" : "CAST('' AS NVARCHAR(60))")
+                . ' AS unit '
+                . 'FROM Tb_Item WHERE ' . implode(' AND ', $where)
+                . ' ORDER BY idx DESC'
+            );
+            $stmt->execute($originProductIdxSet);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (is_array($rows)) {
+                foreach ($rows as $row) {
+                    $originIdx = (int)($row['origin_idx'] ?? 0);
+                    if ($originIdx > 0 && !array_key_exists($originIdx, $mappedByOriginProductIdx)) {
+                        $mappedByOriginProductIdx[$originIdx] = $row;
+                    }
+                }
+            }
+        }
+
+        $legacyProducts = [];
+        if ($originProductIdxSet !== [] && $legacyProductTableExists) {
+            try {
+                $legacyNameCol = null;
+                foreach (['name', 'item_name'] as $col) {
+                    if ($legacyColumnExists($db, $sourceDb, 'Tb_Products', $col)) {
+                        $legacyNameCol = $col;
+                        break;
+                    }
+                }
+                $legacyStdCol = null;
+                foreach (['standard', 'spec'] as $col) {
+                    if ($legacyColumnExists($db, $sourceDb, 'Tb_Products', $col)) {
+                        $legacyStdCol = $col;
+                        break;
+                    }
+                }
+                $legacyUnitCol = null;
+                foreach (['unit'] as $col) {
+                    if ($legacyColumnExists($db, $sourceDb, 'Tb_Products', $col)) {
+                        $legacyUnitCol = $col;
+                        break;
+                    }
+                }
+
+                $ph = implode(',', array_fill(0, count($originProductIdxSet), '?'));
+                $nameExpr = $legacyNameCol !== null
+                    ? "ISNULL(CAST(" . $qi($legacyNameCol) . " AS NVARCHAR(255)), '') AS name"
+                    : "CAST('' AS NVARCHAR(255)) AS name";
+                $stdExpr = $legacyStdCol !== null
+                    ? "ISNULL(CAST(" . $qi($legacyStdCol) . " AS NVARCHAR(255)), '') AS standard"
+                    : "CAST('' AS NVARCHAR(255)) AS standard";
+                $unitExpr = $legacyUnitCol !== null
+                    ? "ISNULL(CAST(" . $qi($legacyUnitCol) . " AS NVARCHAR(60)), '') AS unit"
+                    : "CAST('' AS NVARCHAR(60)) AS unit";
+
+                $sql = "SELECT idx, {$nameExpr}, {$stdExpr}, {$unitExpr}\n"
+                    . "FROM [{$sourceDb}].dbo.[Tb_Products]\n"
+                    . "WHERE idx IN ({$ph})";
+                $stmt = $db->prepare($sql);
+                $stmt->execute($originProductIdxSet);
+                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                if (is_array($rows)) {
+                    foreach ($rows as $row) {
+                        $idx = (int)($row['idx'] ?? 0);
+                        if ($idx > 0) {
+                            $legacyProducts[$idx] = $row;
+                        }
+                    }
+                }
+            } catch (Throwable) {
+                $legacyProducts = [];
+            }
+        }
+
+        $itemMappings = [];
+        $statusCounts = ['완료' => 0, '대기' => 0, '실패' => 0];
+        foreach ($estimateItems as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+            $estimateItemIdx = (int)($item['idx'] ?? 0);
+            $itemIdx = (int)($item['item_idx'] ?? 0);
+            $originProductIdx = (int)($item['origin_product_idx'] ?? 0);
+
+            $mappedItem = $itemIdx > 0 ? ($mappedByItemIdx[$itemIdx] ?? null) : null;
+            $mappingPath = $mappedItem !== null ? 'item_idx' : '';
+            if ($mappedItem === null && $originProductIdx > 0 && isset($mappedByOriginProductIdx[$originProductIdx])) {
+                $mappedItem = $mappedByOriginProductIdx[$originProductIdx];
+                $mappingPath = 'origin_product_idx';
+            }
+
+            $legacyItem = $originProductIdx > 0 ? ($legacyProducts[$originProductIdx] ?? null) : null;
+
+            $mappingStatus = '대기';
+            $mappingReason = '매핑 정보 대기 중';
+            if ($mappedItem !== null) {
+                $mappingStatus = '완료';
+                $mappingReason = $mappingPath === 'origin_product_idx'
+                    ? 'origin_product_idx 기준 매핑 완료'
+                    : 'item_idx 기준 매핑 완료';
+            } elseif ($originProductIdx > 0) {
+                if ($legacyItem !== null || !$legacyProductTableExists) {
+                    $mappingStatus = '대기';
+                    $mappingReason = '구버전 품목은 있으나 V2 품목 매핑이 없습니다';
+                } else {
+                    $mappingStatus = '실패';
+                    $mappingReason = 'origin_product_idx에 해당하는 구버전 품목을 찾을 수 없습니다';
+                }
+            } elseif ($itemIdx > 0) {
+                $mappingStatus = '실패';
+                $mappingReason = 'item_idx가 유효하지 않거나 삭제되었습니다';
+            }
+
+            if (!array_key_exists($mappingStatus, $statusCounts)) {
+                $statusCounts[$mappingStatus] = 0;
+            }
+            $statusCounts[$mappingStatus]++;
+
+            $itemMappings[] = [
+                'estimate_item_idx' => $estimateItemIdx,
+                'item_idx' => $itemIdx,
+                'origin_product_idx' => $originProductIdx,
+                'name' => (string)($item['name'] ?? ''),
+                'standard' => (string)($item['standard'] ?? ''),
+                'unit' => (string)($item['unit'] ?? ''),
+                'qty' => (int)($item['qty'] ?? 0),
+                'mapped_item_idx' => (int)($mappedItem['idx'] ?? 0),
+                'mapped_item_name' => (string)($mappedItem['name'] ?? ''),
+                'legacy_product_name' => (string)($legacyItem['name'] ?? ''),
+                'mapping_path' => $mappingPath,
+                'mapping_status' => $mappingStatus,
+                'mapping_reason' => $mappingReason,
+            ];
+        }
+
+        $schemaInfo = [
+            'v2_has_sale_idx' => $columnExists($db, 'Tb_SiteEstimate', 'sale_idx'),
+            'v2_has_item_origin_product_idx' => $columnExists($db, 'Tb_EstimateItem', 'origin_product_idx'),
+            'v2_has_item_origin_idx' => $columnExists($db, 'Tb_Item', 'origin_idx'),
+            'v2_has_item_origin_table' => $columnExists($db, 'Tb_Item', 'origin_table'),
+            'v2_has_product_estimates_table' => $tableExists($db, 'Tb_Product_Estimates'),
+            'v1_has_product_estimates_table' => $legacySaleTableExists,
+            'v1_has_products_table' => $legacyProductTableExists,
+        ];
+
+        ApiResponse::success([
+            'estimate_idx' => $estimateIdx,
+            'sale_idx' => $saleIdx,
+            'schema' => $schemaInfo,
+            'sale_mapping' => [
+                'status' => $saleMappingStatus,
+                'reason' => $saleMappingReason,
+                'legacy_sale' => $legacySale,
+                'legacy_product' => $legacyProduct,
+                'mapped_item' => $mappedFromSale,
+            ],
+            'data' => $itemMappings,
+            'summary' => [
+                'total' => count($itemMappings),
+                'completed' => (int)($statusCounts['완료'] ?? 0),
+                'pending' => (int)($statusCounts['대기'] ?? 0),
+                'failed' => (int)($statusCounts['실패'] ?? 0),
+            ],
+        ], 'OK', '구버전 품목 매핑 상태 조회 성공');
+        exit;
+    }
+
+    if (in_array($todo, ['est_tab_list', 'estimate_tab_list'], true)) {
+        $siteIdx = (int)($_GET['site_idx'] ?? $_GET['idx'] ?? 0);
+        $memberIdx = (int)($_GET['member_idx'] ?? 0);
+        if ($memberIdx <= 0 && $siteIdx > 0) {
+            $site = $loadSite($db, $tableExists, $columnExists, $firstExistingColumn, $siteIdx);
+            $memberIdx = (int)($site['member_idx'] ?? 0);
+        }
+        if ($memberIdx <= 0) {
+            ApiResponse::error('INVALID_PARAM', 'member_idx or site_idx is required', 422);
+            exit;
+        }
+
+        if (!$tableExists($db, 'Tb_ItemTab')) {
+            ApiResponse::error('SCHEMA_NOT_READY', 'Tb_ItemTab table is missing', 503);
+            exit;
+        }
+
+        $tabNameCol = $firstExistingColumn($db, $columnExists, 'Tb_ItemTab', ['name', 'tab_name']);
+        if ($tabNameCol === null) {
+            ApiResponse::error('SCHEMA_NOT_READY', 'Tb_ItemTab name column is missing', 503);
+            exit;
+        }
+
+        $tabWhere = [];
+        if ($columnExists($db, 'Tb_ItemTab', 'is_deleted')) {
+            $tabWhere[] = 'ISNULL(is_deleted,0)=0';
+        }
+        $tabOrder = $columnExists($db, 'Tb_ItemTab', 'sort_order')
+            ? 'ISNULL(sort_order,0) ASC, idx ASC'
+            : 'idx ASC';
+        $tabSql = 'SELECT idx, ISNULL(CAST(' . $tabNameCol . " AS NVARCHAR(120)), '') AS name"
+            . ($columnExists($db, 'Tb_ItemTab', 'sort_order') ? ', ISNULL(sort_order,0) AS sort_order' : ', CAST(0 AS INT) AS sort_order')
+            . ' FROM Tb_ItemTab'
+            . ($tabWhere !== [] ? ' WHERE ' . implode(' AND ', $tabWhere) : '')
+            . ' ORDER BY ' . $tabOrder;
+        $tabRows = $db->query($tabSql);
+        $tabs = $tabRows !== false ? ($tabRows->fetchAll(PDO::FETCH_ASSOC) ?: []) : [];
+
+        $selectedRaw = '';
+        $selectedSource = 'none';
+        $selectedNamesRaw = '';
+        $selectedNameSource = 'none';
+
+        if ($tableExists($db, 'Tb_Members')) {
+            $v2Cols = [];
+            foreach (['use_estimate_idxs', 'used_estimate', 'item_tab_idx'] as $col) {
+                if ($columnExists($db, 'Tb_Members', $col)) {
+                    $v2Cols[] = $col;
+                }
+            }
+            foreach (['use_tab_names', 'usetabnames'] as $col) {
+                if ($columnExists($db, 'Tb_Members', $col)) {
+                    $v2Cols[] = $col;
+                }
+            }
+
+            if ($v2Cols !== []) {
+                $sql = 'SELECT ' . implode(', ', array_map($qi, $v2Cols)) . ' FROM Tb_Members WHERE idx = ?';
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$memberIdx]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (is_array($row)) {
+                    foreach (['use_estimate_idxs', 'used_estimate', 'item_tab_idx'] as $col) {
+                        if ($selectedRaw !== '') {
+                            break;
+                        }
+                        $value = trim((string)($row[$col] ?? ''));
+                        if ($value !== '') {
+                            $selectedRaw = $value;
+                            $selectedSource = 'v2:Tb_Members.' . $col;
+                        }
+                    }
+                    foreach (['use_tab_names', 'usetabnames'] as $col) {
+                        if ($selectedNamesRaw !== '') {
+                            break;
+                        }
+                        $value = trim((string)($row[$col] ?? ''));
+                        if ($value !== '') {
+                            $selectedNamesRaw = $value;
+                            $selectedNameSource = 'v2:Tb_Members.' . $col;
+                        }
+                    }
+                }
+            }
+        }
+
+        $legacyDb = 'CSM_C004732';
+        if ($selectedRaw === '' || $selectedNamesRaw === '') {
+            $legacyMembersExists = false;
+            try {
+                $legacyMembersExists = $legacyTableExists($db, $legacyDb, 'Tb_Members');
+            } catch (Throwable) {
+                $legacyMembersExists = false;
+            }
+            if ($legacyMembersExists) {
+                $legacyCols = [];
+                foreach (['use_estimate_idxs', 'used_estimate', 'item_tab_idx', 'useTabIdxs'] as $col) {
+                    if ($legacyColumnExists($db, $legacyDb, 'Tb_Members', $col)) {
+                        $legacyCols[] = $col;
+                    }
+                }
+                foreach (['useTabNames', 'use_tab_names'] as $col) {
+                    if ($legacyColumnExists($db, $legacyDb, 'Tb_Members', $col)) {
+                        $legacyCols[] = $col;
+                    }
+                }
+
+                if ($legacyCols !== []) {
+                    $sql = 'SELECT ' . implode(', ', array_map($qi, $legacyCols)) . " FROM [{$legacyDb}].dbo.[Tb_Members] WHERE idx = ?";
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute([$memberIdx]);
+                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if (is_array($row)) {
+                        if ($selectedRaw === '') {
+                            foreach (['use_estimate_idxs', 'used_estimate', 'item_tab_idx', 'useTabIdxs'] as $col) {
+                                $value = trim((string)($row[$col] ?? ''));
+                                if ($value !== '') {
+                                    $selectedRaw = $value;
+                                    $selectedSource = 'v1:Tb_Members.' . $col;
+                                    break;
+                                }
+                            }
+                        }
+                        if ($selectedNamesRaw === '') {
+                            foreach (['useTabNames', 'use_tab_names'] as $col) {
+                                $value = trim((string)($row[$col] ?? ''));
+                                if ($value !== '') {
+                                    $selectedNamesRaw = $value;
+                                    $selectedNameSource = 'v1:Tb_Members.' . $col;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        $selectedIdxs = $parseCsvIdxList($selectedRaw);
+        $selectedSet = array_fill_keys($selectedIdxs, true);
+        $tabNameMap = [];
+        foreach ($tabs as &$tab) {
+            $idx = (int)($tab['idx'] ?? 0);
+            $name = trim((string)($tab['name'] ?? ''));
+            $tab['selected'] = $idx > 0 && isset($selectedSet[$idx]) ? 1 : 0;
+            if ($idx > 0) {
+                $tabNameMap[$idx] = $name;
+            }
+        }
+        unset($tab);
+
+        $selectedNames = [];
+        foreach ($selectedIdxs as $idx) {
+            if (isset($tabNameMap[$idx])) {
+                $selectedNames[] = $tabNameMap[$idx];
+            }
+        }
+        if ($selectedNames === [] && $selectedNamesRaw !== '') {
+            $selectedNames = array_values(array_filter(array_map('trim', preg_split('/[,\|]+/', $selectedNamesRaw) ?: []), static fn(string $v): bool => $v !== ''));
+        }
+
+        ApiResponse::success([
+            'site_idx' => $siteIdx,
+            'member_idx' => $memberIdx,
+            'selected_raw' => $selectedRaw,
+            'selected_source' => $selectedSource,
+            'selected_idxs' => $selectedIdxs,
+            'selected_names' => $selectedNames,
+            'selected_names_source' => $selectedNameSource,
+            'data' => $tabs,
+            'total' => count($tabs),
+            'schema' => [
+                'v2_member_has_use_estimate_idxs' => $columnExists($db, 'Tb_Members', 'use_estimate_idxs'),
+                'v2_member_has_used_estimate' => $columnExists($db, 'Tb_Members', 'used_estimate'),
+                'v2_member_has_item_tab_idx' => $columnExists($db, 'Tb_Members', 'item_tab_idx'),
+            ],
+        ], 'OK', '견적 탭 목록 조회 성공');
+        exit;
+    }
+
+    if (in_array($todo, ['est_category_badges', 'estimate_category_badges', 'category_option_badges'], true)) {
+        $siteIdx = (int)($_GET['site_idx'] ?? $_GET['idx'] ?? 0);
+        $memberIdx = (int)($_GET['member_idx'] ?? 0);
+        if ($memberIdx <= 0 && $siteIdx > 0) {
+            $site = $loadSite($db, $tableExists, $columnExists, $firstExistingColumn, $siteIdx);
+            $memberIdx = (int)($site['member_idx'] ?? 0);
+        }
+        if ($memberIdx <= 0) {
+            ApiResponse::error('INVALID_PARAM', 'member_idx or site_idx is required', 422);
+            exit;
+        }
+        if (!$tableExists($db, 'Tb_ItemCategory')) {
+            ApiResponse::error('SCHEMA_NOT_READY', 'Tb_ItemCategory table is missing', 503);
+            exit;
+        }
+
+        $tabIdx = (int)($_GET['tab_idx'] ?? 0);
+        $hasOptionVal = $columnExists($db, 'Tb_ItemCategory', 'option_val');
+        $optionCols = [];
+        if ($hasOptionVal) {
+            $optionCols[] = 'option_val';
+        } else {
+            for ($i = 1; $i <= 10; $i++) {
+                $col = 'option_' . $i;
+                if ($columnExists($db, 'Tb_ItemCategory', $col)) {
+                    $optionCols[] = $col;
+                }
+            }
+        }
+
+        $memberRegionRaw = '';
+        $memberRegionSource = 'none';
+        if ($tableExists($db, 'Tb_Members')) {
+            $memberCols = [];
+            foreach (['region_options', 'region_idx', 'region'] as $col) {
+                if ($columnExists($db, 'Tb_Members', $col)) {
+                    $memberCols[] = $col;
+                }
+            }
+            if ($memberCols !== []) {
+                $stmt = $db->prepare('SELECT ' . implode(', ', array_map($qi, $memberCols)) . ' FROM Tb_Members WHERE idx = ?');
+                $stmt->execute([$memberIdx]);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (is_array($row)) {
+                    foreach (['region_options', 'region_idx', 'region'] as $col) {
+                        $value = trim((string)($row[$col] ?? ''));
+                        if ($value !== '') {
+                            $memberRegionRaw = $value;
+                            $memberRegionSource = 'v2:Tb_Members.' . $col;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if ($memberRegionRaw === '') {
+            $legacyDb = 'CSM_C004732';
+            $legacyMembersExists = false;
+            try {
+                $legacyMembersExists = $legacyTableExists($db, $legacyDb, 'Tb_Members');
+            } catch (Throwable) {
+                $legacyMembersExists = false;
+            }
+            if ($legacyMembersExists) {
+                $legacyCols = [];
+                foreach (['region_options', 'region_idx'] as $col) {
+                    if ($legacyColumnExists($db, $legacyDb, 'Tb_Members', $col)) {
+                        $legacyCols[] = $col;
+                    }
+                }
+                if ($legacyCols !== []) {
+                    $stmt = $db->prepare('SELECT ' . implode(', ', array_map($qi, $legacyCols)) . " FROM [{$legacyDb}].dbo.[Tb_Members] WHERE idx = ?");
+                    $stmt->execute([$memberIdx]);
+                    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if (is_array($row)) {
+                        foreach (['region_options', 'region_idx'] as $col) {
+                            $value = trim((string)($row[$col] ?? ''));
+                            if ($value !== '') {
+                                $memberRegionRaw = $value;
+                                $memberRegionSource = 'v1:Tb_Members.' . $col;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $memberRegionOpts = $parseCsvIdxList($memberRegionRaw);
+        $memberRegionSet = array_fill_keys($memberRegionOpts, true);
+
+        $selectCols = ['c.idx', "ISNULL(CAST(c.name AS NVARCHAR(255)),'') AS name"];
+        $selectCols[] = $columnExists($db, 'Tb_ItemCategory', 'tab_idx')
+            ? 'ISNULL(TRY_CONVERT(INT,c.tab_idx),0) AS tab_idx'
+            : 'CAST(0 AS INT) AS tab_idx';
+        $selectCols[] = $columnExists($db, 'Tb_ItemCategory', 'parent_idx')
+            ? 'ISNULL(TRY_CONVERT(INT,c.parent_idx),0) AS parent_idx'
+            : 'CAST(0 AS INT) AS parent_idx';
+        $selectCols[] = $columnExists($db, 'Tb_ItemCategory', 'depth')
+            ? 'ISNULL(TRY_CONVERT(INT,c.depth),0) AS depth'
+            : 'CAST(0 AS INT) AS depth';
+        $selectCols[] = $columnExists($db, 'Tb_ItemCategory', 'sort_order')
+            ? 'ISNULL(TRY_CONVERT(INT,c.sort_order),0) AS sort_order'
+            : 'CAST(0 AS INT) AS sort_order';
+        foreach ($optionCols as $col) {
+            $selectCols[] = "ISNULL(CAST(c.{$col} AS NVARCHAR(255)),'') AS {$col}";
+        }
+
+        $where = ['1=1'];
+        $params = [];
+        if ($columnExists($db, 'Tb_ItemCategory', 'is_deleted')) {
+            $where[] = 'ISNULL(c.is_deleted,0)=0';
+        }
+        if ($tabIdx > 0 && $columnExists($db, 'Tb_ItemCategory', 'tab_idx')) {
+            $where[] = 'ISNULL(TRY_CONVERT(INT,c.tab_idx),0)=?';
+            $params[] = $tabIdx;
+        }
+
+        $orderSql = 'ORDER BY '
+            . ($columnExists($db, 'Tb_ItemCategory', 'tab_idx') ? 'ISNULL(c.tab_idx,0), ' : '')
+            . ($columnExists($db, 'Tb_ItemCategory', 'parent_idx') ? 'ISNULL(c.parent_idx,0), ' : '')
+            . ($columnExists($db, 'Tb_ItemCategory', 'sort_order') ? 'ISNULL(c.sort_order,0), ' : '')
+            . 'c.idx';
+        $sql = 'SELECT ' . implode(",\n", $selectCols)
+            . "\nFROM Tb_ItemCategory c\nWHERE " . implode(' AND ', $where)
+            . "\n{$orderSql}";
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!is_array($rows)) {
+            $rows = [];
+        }
+
+        $result = [];
+        foreach ($rows as $row) {
+            $badges = [];
+            if ($hasOptionVal) {
+                $value = trim((string)($row['option_val'] ?? ''));
+                if ($value !== '') {
+                    $badges[] = [
+                        'label' => $value,
+                        'region_idx' => 0,
+                        'column' => 'option_val',
+                    ];
+                }
+            } else {
+                foreach ($optionCols as $col) {
+                    if (!str_starts_with($col, 'option_')) {
+                        continue;
+                    }
+                    $value = trim((string)($row[$col] ?? ''));
+                    if ($value === '') {
+                        continue;
+                    }
+                    $idx = (int)str_replace('option_', '', $col);
+                    $badges[] = [
+                        'label' => $value,
+                        'region_idx' => $idx,
+                        'column' => $col,
+                    ];
+                }
+            }
+
+            $regionMatched = true;
+            if ($memberRegionOpts !== []) {
+                $regionMatched = false;
+                foreach ($badges as $badge) {
+                    $badgeRegionIdx = (int)($badge['region_idx'] ?? 0);
+                    if ($badgeRegionIdx > 0 && isset($memberRegionSet[$badgeRegionIdx])) {
+                        $regionMatched = true;
+                        break;
+                    }
+                }
+                if (!$regionMatched && $hasOptionVal && $badges !== []) {
+                    // option_val 단일 컬럼 스키마일 때는 region 인덱스 매핑 정보가 없어 표시 허용
+                    $regionMatched = true;
+                }
+            }
+            if (!$regionMatched) {
+                continue;
+            }
+
+            $result[] = [
+                'idx' => (int)($row['idx'] ?? 0),
+                'name' => (string)($row['name'] ?? ''),
+                'tab_idx' => (int)($row['tab_idx'] ?? 0),
+                'parent_idx' => (int)($row['parent_idx'] ?? 0),
+                'depth' => (int)($row['depth'] ?? 0),
+                'sort_order' => (int)($row['sort_order'] ?? 0),
+                'badges' => $badges,
+                'region_matched' => $regionMatched ? 1 : 0,
+            ];
+        }
+
+        ApiResponse::success([
+            'site_idx' => $siteIdx,
+            'member_idx' => $memberIdx,
+            'tab_idx' => $tabIdx,
+            'member_region_raw' => $memberRegionRaw,
+            'member_region_opts' => $memberRegionOpts,
+            'member_region_source' => $memberRegionSource,
+            'schema' => [
+                'has_option_val' => $hasOptionVal,
+                'option_columns' => $optionCols,
+                'member_has_region_options' => $columnExists($db, 'Tb_Members', 'region_options'),
+                'member_has_region_idx' => $columnExists($db, 'Tb_Members', 'region_idx'),
+            ],
+            'data' => $result,
+            'total' => count($result),
+        ], 'OK', '카테고리 옵션 배지 조회 성공');
+        exit;
+    }
+
     if ($todo === 'insert_est') {
         if (!$tableExists($db, 'Tb_SiteEstimate')) {
             ApiResponse::error('SCHEMA_NOT_READY', 'Tb_SiteEstimate table is missing', 503);
@@ -6340,6 +7145,20 @@ try {
             if ($orderAmountCol !== null && !in_array($orderAmountCol, $columns, true)) {
                 $columns[] = $orderAmountCol;
                 $values[] = $parseIntAmount($_POST['order_amount']);
+            }
+        }
+        if (array_key_exists('cost_total', $_POST)) {
+            $costTotalCol = $firstExistingColumn($db, $columnExists, 'Tb_SiteEstimate', ['cost_total']);
+            if ($costTotalCol !== null && !in_array($costTotalCol, $columns, true)) {
+                $columns[] = $costTotalCol;
+                $values[] = $parseIntAmount($_POST['cost_total']);
+            }
+        }
+        if (array_key_exists('increase_amount', $_POST)) {
+            $increaseAmountCol = $firstExistingColumn($db, $columnExists, 'Tb_SiteEstimate', ['increase_amount']);
+            if ($increaseAmountCol !== null && !in_array($increaseAmountCol, $columns, true)) {
+                $columns[] = $increaseAmountCol;
+                $values[] = $parseIntAmount($_POST['increase_amount']);
             }
         }
 
@@ -6471,6 +7290,20 @@ try {
             if ($orderAmountCol !== null) {
                 $setSql[] = $orderAmountCol . ' = ?';
                 $params[] = $parseIntAmount($_POST['order_amount']);
+            }
+        }
+        if (array_key_exists('cost_total', $_POST)) {
+            $costTotalCol = $firstExistingColumn($db, $columnExists, 'Tb_SiteEstimate', ['cost_total']);
+            if ($costTotalCol !== null) {
+                $setSql[] = $costTotalCol . ' = ?';
+                $params[] = $parseIntAmount($_POST['cost_total']);
+            }
+        }
+        if (array_key_exists('increase_amount', $_POST)) {
+            $increaseAmountCol = $firstExistingColumn($db, $columnExists, 'Tb_SiteEstimate', ['increase_amount']);
+            if ($increaseAmountCol !== null) {
+                $setSql[] = $increaseAmountCol . ' = ?';
+                $params[] = $parseIntAmount($_POST['increase_amount']);
             }
         }
 

@@ -30,6 +30,7 @@ try {
     $v1LegacyListTodos = ['v1_legacy_list', 'legacy_list_v1'];
     $copyFromV1Todos = ['copy_from_v1', 'v1_copy'];
     $tabListTodos = ['tab_list', 'item_tab_list'];
+    $itemPropertyMasterTodos = ['item_property_master', 'pjt_property_master'];
     $tabInsertTodos = ['tab_insert', 'item_tab_insert'];
     $tabDeleteTodos = ['tab_delete', 'item_tab_delete'];
     $moveItemsTodos = ['move_items', 'items_move', 'item_move'];
@@ -87,6 +88,201 @@ try {
     $service     = new MaterialService($db);
     $catService  = new CategoryService($db);
     $actorUserPk = (int)($context['user_pk'] ?? 0);
+
+    if (in_array($todo, $itemPropertyMasterTodos, true)) {
+        $serviceCode = (string)($context['service_code'] ?? 'shvq');
+        $tenantId = (int)($context['tenant_id'] ?? 0);
+
+        $normalizeColor = static function (mixed $raw): string {
+            $value = strtoupper(trim((string)$raw));
+            if (preg_match('/^#[0-9A-F]{6}$/', $value) === 1) {
+                return $value;
+            }
+            if (preg_match('/^[0-9A-F]{6}$/', $value) === 1) {
+                return '#' . $value;
+            }
+            if (preg_match('/^#[0-9A-F]{3}$/', $value) === 1) {
+                return '#' . $value[1] . $value[1] . $value[2] . $value[2] . $value[3] . $value[3];
+            }
+            if (preg_match('/^[0-9A-F]{3}$/', $value) === 1) {
+                return '#' . $value[0] . $value[0] . $value[1] . $value[1] . $value[2] . $value[2];
+            }
+            return '#FFFFFF';
+        };
+
+        $propertyMap = ['0' => '없음'];
+        $colorsMap = ['0' => '#FFFFFF'];
+
+        $tableExistsStmt = $db->prepare(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ? AND TABLE_TYPE = 'BASE TABLE'"
+        );
+        $columnExistsStmt = $db->prepare(
+            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND COLUMN_NAME = ?"
+        );
+
+        $tableExists = static function (string $table) use ($tableExistsStmt): bool {
+            $tableExistsStmt->execute([$table]);
+            return (int)$tableExistsStmt->fetchColumn() > 0;
+        };
+        $columnExists = static function (string $table, string $column) use ($columnExistsStmt): bool {
+            $columnExistsStmt->execute([$table, $column]);
+            return (int)$columnExistsStmt->fetchColumn() > 0;
+        };
+
+        $decodeConstant = static function (string $constantName): array {
+            if (!defined($constantName)) {
+                return [];
+            }
+            $value = constant($constantName);
+            if (is_array($value)) {
+                return $value;
+            }
+            if (is_string($value)) {
+                $decoded = json_decode($value, true);
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
+            }
+            return [];
+        };
+
+        $readSetting = static function (string $settingKey) use (
+            $db,
+            $serviceCode,
+            $tenantId,
+            $columnExists
+        ): array {
+            $where = ['setting_key IN (?, ?)'];
+            $params = [$settingKey, strtolower($settingKey)];
+
+            if ($columnExists('Tb_UserSettings', 'service_code')) {
+                $where[] = 'service_code = ?';
+                $params[] = $serviceCode;
+            }
+            if ($columnExists('Tb_UserSettings', 'tenant_id')) {
+                $where[] = 'ISNULL(tenant_id, 0) = ?';
+                $params[] = $tenantId;
+            }
+            if ($columnExists('Tb_UserSettings', 'is_deleted')) {
+                $where[] = 'ISNULL(is_deleted, 0) = 0';
+            }
+            if ($columnExists('Tb_UserSettings', 'user_id')) {
+                $where[] = "(ISNULL(user_id, '') IN ('', ?) OR user_id LIKE '__SYSTEM__:%')";
+                $params[] = '__SYSTEM__:' . strtoupper($settingKey);
+            }
+
+            $orderParts = [];
+            if ($columnExists('Tb_UserSettings', 'updated_at')) {
+                $orderParts[] = 'updated_at DESC';
+            }
+            if ($columnExists('Tb_UserSettings', 'regdate')) {
+                $orderParts[] = 'regdate DESC';
+            }
+            if ($columnExists('Tb_UserSettings', 'idx')) {
+                $orderParts[] = 'idx DESC';
+            }
+            if ($orderParts === []) {
+                $orderParts[] = '(SELECT NULL)';
+            }
+
+            $sql = 'SELECT TOP 1 setting_value FROM Tb_UserSettings WHERE '
+                . implode(' AND ', $where)
+                . ' ORDER BY ' . implode(', ', $orderParts);
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            $raw = $stmt->fetchColumn();
+            if (!is_string($raw) || trim($raw) === '') {
+                return [];
+            }
+            $decoded = json_decode($raw, true);
+            return is_array($decoded) ? $decoded : [];
+        };
+
+        if (
+            $tableExists('Tb_UserSettings')
+            && $columnExists('Tb_UserSettings', 'setting_key')
+            && $columnExists('Tb_UserSettings', 'setting_value')
+        ) {
+            $propertyRaw = $readSetting('ITEM_PROPERTY');
+            $colorRaw = $readSetting('ITEM_PROPERTY_COLORS');
+
+            if ($propertyRaw === []) {
+                $propertyRaw = $decodeConstant('ITEM_PROPERTY');
+            }
+            if ($colorRaw === []) {
+                $colorRaw = $decodeConstant('ITEM_PROPERTY_COLORS');
+            }
+
+            foreach ($propertyRaw as $key => $label) {
+                $propertyKey = trim((string)$key);
+                $name = trim((string)$label);
+                if ($propertyKey === '' || $name === '') {
+                    continue;
+                }
+                $propertyMap[$propertyKey] = $name;
+            }
+
+            foreach ($colorRaw as $key => $color) {
+                $colorKey = trim((string)$key);
+                if ($colorKey === '') {
+                    continue;
+                }
+                $colorsMap[$colorKey] = $normalizeColor($color);
+            }
+        } else {
+            $propertyRaw = $decodeConstant('ITEM_PROPERTY');
+            $colorRaw = $decodeConstant('ITEM_PROPERTY_COLORS');
+            foreach ($propertyRaw as $key => $label) {
+                $propertyKey = trim((string)$key);
+                $name = trim((string)$label);
+                if ($propertyKey === '' || $name === '') {
+                    continue;
+                }
+                $propertyMap[$propertyKey] = $name;
+            }
+            foreach ($colorRaw as $key => $color) {
+                $colorKey = trim((string)$key);
+                if ($colorKey === '') {
+                    continue;
+                }
+                $colorsMap[$colorKey] = $normalizeColor($color);
+            }
+        }
+
+        if (!array_key_exists('0', $propertyMap) || trim((string)$propertyMap['0']) === '') {
+            $propertyMap['0'] = '없음';
+        }
+        ksort($propertyMap, SORT_NATURAL);
+
+        foreach ($propertyMap as $key => $_name) {
+            if (!array_key_exists($key, $colorsMap)) {
+                $colorsMap[$key] = '#FFFFFF';
+            }
+        }
+        $colorsMap['0'] = $normalizeColor($colorsMap['0'] ?? '#FFFFFF');
+        ksort($colorsMap, SORT_NATURAL);
+
+        $properties = [];
+        foreach ($propertyMap as $key => $name) {
+            $keyText = trim((string)$key);
+            if ($keyText === '') {
+                continue;
+            }
+
+            $properties[] = [
+                'key' => ctype_digit($keyText) ? (int)$keyText : $keyText,
+                'name' => (string)$name,
+                'color' => (string)($colorsMap[$keyText] ?? '#FFFFFF'),
+            ];
+        }
+
+        ApiResponse::success([
+            'properties' => $properties,
+            'property_map' => $propertyMap,
+            'colors' => $colorsMap,
+        ], 'OK', 'PJT 속성 마스터 조회 성공');
+        exit;
+    }
 
     if (in_array($todo, $listTodos, true)) {
         $query = $_GET + $_POST;
