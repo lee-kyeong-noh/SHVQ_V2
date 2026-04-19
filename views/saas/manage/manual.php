@@ -892,15 +892,16 @@ curl -s --ftp-pasv -u "vision_ftp:dlrudfh@019" \
                 </table>
             </div>
             <div class="manual-card mt-3">
-                <div class="manual-sub-title">품목 속성 — $Product['property']</div>
+                <div class="manual-sub-title">품목 속성 — $ITEM_PROPERTY (V1 config.php 기준)</div>
                 <table class="manual-tbl">
                     <tr><th>키</th><th>값</th><th>색상</th></tr>
-                    <tr><td>0</td><td>없음</td><td style="background:#FFFFFF;border:1px solid #ddd">#FFFFFF</td></tr>
-                    <tr><td>2</td><td>HDEL(표준)</td><td style="background:#FF0000;color:#fff">#FF0000</td></tr>
-                    <tr><td>3</td><td>HDEL(비표준_S)</td><td style="background:#FFA500;color:#fff">#FFA500</td></tr>
-                    <tr><td>4</td><td>HDEL(비표준_기술)</td><td style="background:#FFFF00">#FFFF00</td></tr>
-                    <tr><td>5</td><td>HDEL(MOD)</td><td style="background:#00FF00">#00FF00</td></tr>
-                    <tr><td>6</td><td>HDEL(JQPR)</td><td style="background:#0000FF;color:#fff">#0000FF</td></tr>
+                    <tr><td>0</td><td>없음</td><td style="background:#94a3b8;color:#fff">#94a3b8</td></tr>
+                    <tr><td>1</td><td>HDEL_표준B</td><td style="background:#3b82f6;color:#fff">#3b82f6</td></tr>
+                    <tr><td>2</td><td>HDEL표준A</td><td style="background:#10b981;color:#fff">#10b981</td></tr>
+                    <tr><td>3</td><td>HDEL_비표준A</td><td style="background:#f59e0b;color:#fff">#f59e0b</td></tr>
+                    <tr><td>4</td><td>HDEL_비표준B</td><td style="background:#e11d48;color:#fff">#e11d48</td></tr>
+                    <tr><td>5</td><td>HDEL_보수</td><td style="background:#8b5cf6;color:#fff">#8b5cf6</td></tr>
+                    <tr><td>6</td><td>HDEL_리모델링</td><td style="background:#ef4444;color:#fff">#ef4444</td></tr>
                 </table>
             </div>
             <div class="manual-card mt-3">

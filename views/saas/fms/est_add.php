@@ -194,13 +194,14 @@ function loadPjtAttrs(){
     }).catch(function(){});
 }
 /* 6번: 글로벌 속성 마스터 우선, 없으면 기존 _pjtAttrColors fallback */
-/* manual.php 6종 hardcode fallback — API 실패 시에도 표시 보장 */
+/* V1 config.php $ITEM_PROPERTY / $ITEM_PROPERTY_COLORS 그대로 (line 243~260) */
 var _propMasterFallback={
-    2:{name:'HDEL(표준)',color:'#FF0000'},
-    3:{name:'HDEL(비표준_S)',color:'#FFA500'},
-    4:{name:'HDEL(비표준_기술)',color:'#FFFF00'},
-    5:{name:'HDEL(MOD)',color:'#00FF00'},
-    6:{name:'HDEL(JQPR)',color:'#0000FF'}
+    1:{name:'HDEL_표준B',   color:'#3b82f6'},
+    2:{name:'HDEL표준A',    color:'#10b981'},
+    3:{name:'HDEL_비표준A', color:'#f59e0b'},
+    4:{name:'HDEL_비표준B', color:'#e11d48'},
+    5:{name:'HDEL_보수',    color:'#8b5cf6'},
+    6:{name:'HDEL_리모델링',color:'#ef4444'}
 };
 var _propMaster={};
 function loadItemPropertyMaster(){
