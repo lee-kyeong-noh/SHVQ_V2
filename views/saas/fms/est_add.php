@@ -131,7 +131,7 @@ $isPjtMode   = (($_GET['pjt_mode'] ?? '') === '1');
 'use strict';
 var _isModify=<?=$isModify?'true':'false'?>,_modifyIdx=<?=$modifyIdx?>,_siteIdx=<?=$siteIdx?>,_memberIdx=<?=$memberIdx?>,_isPjtMode=<?=$isPjtMode?'true':'false'?>;
 var _cart=[],_cartId=0,_pjtAttrs=[],_pjtAttrColors={},_pendingFiles=[];
-var _siteName='',_pjtTabs=[],_legacyMappings=[],_catBadges={};
+var _siteName='',_pjtTabs=[],_legacyMappings={},_catBadges={};
 
 /* ══════════════════════════════════════
    백엔드 어댑터 (Codex API 응답 대기용)
